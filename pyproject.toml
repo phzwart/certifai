@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "certifai"
-version = "0.1.2"
+version = "0.1.5"
 description = "Human–AI code certification toolkit"
 readme = "README.md"
 license = { text = "MIT" }
