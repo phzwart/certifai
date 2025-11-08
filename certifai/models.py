@@ -12,7 +12,7 @@ from pathlib import Path
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.515259+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
 
 class ScrutinyLevel(str, Enum):
     """Enumeration of supported scrutiny levels."""
@@ -27,7 +27,7 @@ class ScrutinyLevel(str, Enum):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.515259+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
     
     @classmethod
     def from_string(cls, value: str | None) -> ScrutinyLevel | None:
@@ -47,7 +47,7 @@ class ScrutinyLevel(str, Enum):
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.515259+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class TagMetadata:
@@ -66,7 +66,7 @@ class TagMetadata:
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.515259+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
     
     @classmethod
     def from_comment_block(cls, lines: list[str]) -> TagMetadata:
@@ -110,7 +110,7 @@ class TagMetadata:
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.515259+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
     
     def to_comment_block(self) -> list[str]:
         """Serialize metadata back into a sequence of comment lines."""
@@ -136,7 +136,7 @@ class TagMetadata:
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.515259+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
     
     def clone(self) -> TagMetadata:
         """Return a deep-ish copy suitable for mutation."""
@@ -156,7 +156,7 @@ class TagMetadata:
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.515259+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
     
     @property
     def has_metadata(self) -> bool:
@@ -178,7 +178,7 @@ class TagMetadata:
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.515259+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
     
     @property
     def is_pending_certification(self) -> bool:
@@ -192,7 +192,7 @@ class TagMetadata:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.515259+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class CommentBlock:
@@ -208,7 +208,7 @@ class CommentBlock:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.515259+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.515259+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:53.826744+00:00 digest=04802efb16c9a526a408c878f4af23ebc973c632 last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class CodeArtifact:

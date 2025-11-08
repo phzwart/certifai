@@ -7,10 +7,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from .history import build_history_entry, compute_digest, extract_digest
+from .metadata import MetadataUpdate, update_metadata_blocks
 from .models import CodeArtifact, ScrutinyLevel, TagMetadata
 from .parser import iter_python_files, parse_file
 from .policy import DEFAULT_POLICY, PolicyConfig
-from .utils.git import describe_line
 from .utils.logging import get_logger
 
 LOGGER = get_logger("provenance")
@@ -21,7 +22,7 @@ LOGGER = get_logger("provenance")
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class ProvenanceResult:
@@ -37,7 +38,7 @@ class ProvenanceResult:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
 
 def annotate_paths(
     paths: Iterable[Path | str],
@@ -51,32 +52,38 @@ def annotate_paths(
 
     resolved_paths = list(iter_python_files(paths))
     collected_artifacts: list[CodeArtifact] = []
-    updated_files: list[Path] = []
+    updated_paths: set[Path] = set()
 
     for path in resolved_paths:
         artifacts = list(parse_file(path))
         needs_update = [artifact for artifact in artifacts if not artifact.tags.has_metadata]
-        if not needs_update:
-            collected_artifacts.extend(artifacts)
-            continue
-        LOGGER.debug("Annotating %s with %d metadata blocks", path, len(needs_update))
-        if _insert_metadata_blocks(
-            path,
-            needs_update,
-            ai_agent=ai_agent,
-            default_notes=default_notes,
-            timestamp=timestamp,
-        ):
-            updated_files.append(path)
+        file_changed = False
+
+        if needs_update:
+            LOGGER.debug("Annotating %s with %d metadata blocks", path, len(needs_update))
+            if _insert_metadata_blocks(
+                path,
+                needs_update,
+                ai_agent=ai_agent,
+                default_notes=default_notes,
+                timestamp=timestamp,
+            ):
+                file_changed = True
+        artifacts = list(parse_file(path))
+        if _refresh_history_blocks(path, artifacts, timestamp):
+            file_changed = True
             artifacts = list(parse_file(path))
+
         collected_artifacts.extend(artifacts)
+        if file_changed:
+            updated_paths.add(path)
 
     active_policy = policy or DEFAULT_POLICY
     violations = enforce_policy(collected_artifacts, active_policy)
 
     return ProvenanceResult(
         artifacts=collected_artifacts,
-        updated_files=updated_files,
+        updated_files=sorted(updated_paths),
         policy_violations=violations,
     )
 
@@ -86,7 +93,7 @@ def annotate_paths(
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
 
 def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> list[str]:
     """Return a list of policy violations detected for the given artifacts."""
@@ -122,7 +129,7 @@ def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> l
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
 
 def _insert_metadata_blocks(
     path: Path,
@@ -149,14 +156,14 @@ def _insert_metadata_blocks(
             date=iso_timestamp,
             notes=default_notes,
         )
-        history_entry = f"{iso_timestamp} inserted by certifai"
-        blame_info = describe_line(artifact.filepath, artifact.lineno)
-        if blame_info:
-            history_entry = (
-                f"{history_entry}; last_commit={blame_info['commit'][:7]}"
-                f" by {blame_info['author']}"
+        metadata.history = [
+            build_history_entry(
+                artifact,
+                metadata,
+                timestamp=effective_timestamp,
+                action="annotated",
             )
-        metadata.history.append(history_entry)
+        ]
 
         block = metadata.to_comment_block()
         if not block:
@@ -171,3 +178,45 @@ def _insert_metadata_blocks(
     if changed:
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return changed
+
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:54:54.247217+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:54:54.247217+00:00 digest=39ce520a0b7bafe0ce44844476d4b4cf86f29900 annotated last_commit=uncommitted
+
+def _refresh_history_blocks(
+    path: Path,
+    artifacts: Sequence[CodeArtifact],
+    timestamp: datetime | None,
+) -> bool:
+    updates: list[MetadataUpdate] = []
+    effective_timestamp = timestamp or datetime.now(timezone.utc)
+
+    for artifact in artifacts:
+        if artifact.comment_block is None:
+            continue
+
+        metadata = artifact.tags.clone()
+        existing_entry = metadata.history[0] if metadata.history else None
+        current_digest = compute_digest(metadata)
+        stored_digest = extract_digest(existing_entry)
+
+        if stored_digest == current_digest and existing_entry is not None:
+            continue
+
+        metadata.history = [
+            build_history_entry(
+                artifact,
+                metadata,
+                timestamp=effective_timestamp,
+            )
+        ]
+        updates.append((artifact, metadata))
+
+    if not updates:
+        return False
+
+    return update_metadata_blocks(path, updates)

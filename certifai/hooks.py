@@ -18,7 +18,7 @@ LOGGER = get_logger("hooks")
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.475775+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.475775+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:28.719649+00:00 digest=11391cb64b4371e1ad542ea38854dbfb1145d97a last_commit=f07d0d9 by phzwart
 
 def run_pre_commit(
     paths: Iterable[str],
@@ -45,7 +45,7 @@ def run_pre_commit(
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.475775+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.475775+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:28.719649+00:00 digest=11391cb64b4371e1ad542ea38854dbfb1145d97a last_commit=f07d0d9 by phzwart
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="certifai pre-commit hook")
@@ -69,7 +69,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.475775+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.475775+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:28.719649+00:00 digest=11391cb64b4371e1ad542ea38854dbfb1145d97a last_commit=f07d0d9 by phzwart
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)

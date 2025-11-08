@@ -9,6 +9,8 @@ from typing import Iterable
 # @ai_composed: gpt-5
 # @human_certified: pending
 # scrutiny: auto
+# history: 2025-11-08T00:54:54.656421+00:00 digest=29c7c1fe26abc3d014ba0d410f5d0c8e1432057f last_commit=f07d0d9 by phzwart
+
 def compute_accuracy(predictions: Iterable[int], labels: Iterable[int]) -> float:
     """Return simple classification accuracy."""
 
@@ -25,6 +27,8 @@ def compute_accuracy(predictions: Iterable[int], labels: Iterable[int]) -> float
 # scrutiny: high
 # date: 2025-10-12
 # notes: Benchmarked across synthetic data set
+# history: 2025-11-08T00:54:54.656421+00:00 digest=60d58c981a4e5164c022bddef297273430bd2413 last_commit=f07d0d9 by phzwart
+
 def compute_macro_f1(scores: Iterable[tuple[float, float]]) -> float:
     """Compute macro-averaged F1 score from (precision, recall) tuples."""
 
@@ -43,7 +47,7 @@ def compute_macro_f1(scores: Iterable[tuple[float, float]]) -> float:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.158086+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.158086+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.656421+00:00 digest=884b90b9b284333b2ebe0153576c8216ae89a977 last_commit=f07d0d9 by phzwart
 
 def summarize_predictions(predictions: Iterable[float]) -> dict[str, float]:
     """Return simple summary metrics for model predictions.

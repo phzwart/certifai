@@ -7,7 +7,7 @@ We evaluated `certifai` on two public Python repositories to gauge annotation co
 1. [karpathy/micrograd](https://github.com/karpathy/micrograd)
 2. [pallets/click](https://github.com/pallets/click)
 
-All commands were executed from the project root using the `cctbx` conda environment. Metrics were collected via `python -m certifai.cli report --format json ...` with `PYTHONPATH` set to the local checkout.
+All commands were executed from the project root using the `ssbc` conda environment. Metrics were collected via `python -m certifai.cli report --format json ...` with `PYTHONPATH` set to the local checkout.
 
 ## Repository Metrics
 

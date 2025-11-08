@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from .history import build_history_entry
+from .metadata import MetadataUpdate, update_metadata_blocks
 from .models import CodeArtifact, CommentBlock, ScrutinyLevel, TagMetadata
 from .parser import iter_python_files, parse_file
 from .utils.logging import get_logger
@@ -18,7 +20,7 @@ LOGGER = get_logger("certify")
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.964853+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.964853+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.326786+00:00 digest=e402cfa510f6bb78119b6fdaa342147464e60a2b last_commit=f07d0d9 by phzwart
 
 def certify(
     paths: Iterable[Path | str],
@@ -62,7 +64,7 @@ def certify(
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.964853+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.964853+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.326786+00:00 digest=e402cfa510f6bb78119b6fdaa342147464e60a2b last_commit=f07d0d9 by phzwart
 
 def verify_all(
     reviewer: str,
@@ -84,7 +86,7 @@ def verify_all(
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.964853+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.964853+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.326786+00:00 digest=e402cfa510f6bb78119b6fdaa342147464e60a2b last_commit=f07d0d9 by phzwart
 
 def _rewrite_metadata(
     path: Path,
@@ -93,10 +95,10 @@ def _rewrite_metadata(
     scrutiny: ScrutinyLevel,
     notes: str | None,
 ) -> bool:
-    source = path.read_text(encoding="utf-8")
-    lines = source.splitlines()
-    changed = False
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp_dt = datetime.now(timezone.utc)
+    timestamp = timestamp_dt.isoformat()
+
+    updates_payload: list[MetadataUpdate] = []
 
     for artifact in artifacts:
         comment_block = artifact.comment_block
@@ -113,14 +115,17 @@ def _rewrite_metadata(
         metadata.date = timestamp
         if notes:
             metadata.notes = notes
-        metadata.history.append(f"{timestamp} certified by {reviewer} ({scrutiny.value})")
-        block_lines = metadata.to_comment_block()
-        indented_block = [f"{artifact.indent}{line}" for line in block_lines]
-        start_idx = comment_block.start_line - 1
-        end_idx = comment_block.end_line
-        lines[start_idx:end_idx] = indented_block
-        changed = True
+        metadata.history = [
+            build_history_entry(
+                artifact,
+                metadata,
+                timestamp=timestamp_dt,
+                action=f"certified by {reviewer} ({scrutiny.value})",
+            )
+        ]
+        updates_payload.append((artifact, metadata))
 
-    if changed:
-        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return changed
+    if not updates_payload:
+        return False
+
+    return update_metadata_blocks(path, updates_payload)

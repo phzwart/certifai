@@ -16,7 +16,7 @@ from .parser import iter_python_files, parse_file
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class CoverageSummary:
@@ -34,7 +34,7 @@ class CoverageSummary:
     # scrutiny: auto
     # date: 2025-11-08T00:34:46.021164+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
     
     @property
     def coverage_ratio(self) -> float:
@@ -49,7 +49,7 @@ class CoverageSummary:
     # scrutiny: auto
     # date: 2025-11-08T00:34:46.021164+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
     
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serialisable representation of the summary."""
@@ -69,7 +69,7 @@ class CoverageSummary:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
 
 def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
     """Inspect project sources and build a coverage summary."""
@@ -115,7 +115,7 @@ def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
 
 def emit_text_report(summary: CoverageSummary) -> str:
     """Render a human-readable report for console output."""
@@ -140,7 +140,7 @@ def emit_text_report(summary: CoverageSummary) -> str:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
 
 def emit_csv_report(summary: CoverageSummary) -> str:
     """Return a CSV representation of the coverage metrics."""
@@ -168,7 +168,7 @@ def emit_csv_report(summary: CoverageSummary) -> str:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
 
 def emit_markdown_table(summary: CoverageSummary) -> str:
     """Return a markdown table summarising coverage metrics."""
@@ -189,7 +189,7 @@ def emit_markdown_table(summary: CoverageSummary) -> str:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.021164+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
 
 def github_actions_step() -> str:
     """Return a reusable GitHub Actions snippet for running certifai."""

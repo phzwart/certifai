@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional
 
 from git import Repo
-from git.exc import InvalidGitRepositoryError
+from git.exc import GitCommandError, InvalidGitRepositoryError
 
 
 # @ai_composed: gpt-5
@@ -15,7 +15,7 @@ from git.exc import InvalidGitRepositoryError
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.129767+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.129767+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.592042+00:00 digest=d176985bb4a7cc4297566717811bb6669fdb64e9 last_commit=f07d0d9 by phzwart
 
 @lru_cache(maxsize=1)
 def get_repo(start_path: Path | None = None) -> Optional[Repo]:
@@ -33,7 +33,7 @@ def get_repo(start_path: Path | None = None) -> Optional[Repo]:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.129767+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.129767+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.592042+00:00 digest=d176985bb4a7cc4297566717811bb6669fdb64e9 last_commit=f07d0d9 by phzwart
 
 def describe_line(path: Path, lineno: int) -> dict[str, str] | None:
     """Return commit metadata for a specific line within a file."""
@@ -45,7 +45,10 @@ def describe_line(path: Path, lineno: int) -> dict[str, str] | None:
         relpath = path.resolve().relative_to(Path(repo.working_tree_dir).resolve())
     except ValueError:
         return None
-    blame_entries = repo.blame("HEAD", str(relpath))
+    try:
+        blame_entries = repo.blame("HEAD", str(relpath))
+    except GitCommandError:
+        return None
     current_line = 0
     for commit, lines in blame_entries:
         for _ in lines:

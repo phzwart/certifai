@@ -31,7 +31,7 @@ LOGGER = get_logger("cli")
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 def _configure_logging(verbose: bool) -> None:
     level = logging.DEBUG if verbose else logging.INFO
@@ -43,7 +43,7 @@ def _configure_logging(verbose: bool) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @click.group()
 @click.option("--verbose", is_flag=True, help="Enable verbose logging output.")
@@ -59,7 +59,7 @@ def cli(verbose: bool) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -86,7 +86,7 @@ def annotate(paths: tuple[Path, ...], ai_agent: str, notes: str, policy: Path | 
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -107,7 +107,7 @@ def certify(paths: tuple[Path, ...], reviewer: str, scrutiny: str, notes: str | 
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @cli.group()
 def verify() -> None:
@@ -119,7 +119,7 @@ def verify() -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @verify.command("all")
 @click.option("--reviewer", required=True, help="Reviewer identifier for verification.")
@@ -136,7 +136,7 @@ def verify_all(reviewer: str, scrutiny: str | None) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -167,7 +167,7 @@ def report(paths: tuple[Path, ...], output_format: str) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -191,7 +191,7 @@ def badge(paths: tuple[Path, ...]) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @cli.group()
 def config() -> None:
@@ -203,7 +203,7 @@ def config() -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 @config.command("show")
 @click.option("--path", type=click.Path(path_type=Path), help="Optional path to a policy file.")
@@ -225,7 +225,7 @@ def config_show(path: Path | None) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
 
 def main(argv: Optional[list[str]] = None) -> int:
     """Entry point used by console script entry point."""

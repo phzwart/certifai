@@ -12,7 +12,7 @@ from certifai.cli import cli
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.222693+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.222693+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.780410+00:00 digest=da430a85d855217c4ef34da43354c020311db4a1 last_commit=f07d0d9 by phzwart
 
 def test_report_command_outputs_json(tmp_path: Path) -> None:
     module = tmp_path / "module.py"
@@ -30,7 +30,7 @@ def test_report_command_outputs_json(tmp_path: Path) -> None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.222693+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:46.222693+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.780410+00:00 digest=da430a85d855217c4ef34da43354c020311db4a1 last_commit=f07d0d9 by phzwart
 
 def test_annotate_command_inserts_metadata(tmp_path: Path) -> None:
     module = tmp_path / "module.py"

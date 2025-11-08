@@ -14,7 +14,7 @@ from .models import CodeArtifact, CommentBlock, ScrutinyLevel, TagMetadata
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.681446+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
 
 def iter_python_files(paths: Iterable[Path | str]) -> Iterator[Path]:
     """Yield Python files from the provided path collection."""
@@ -32,7 +32,7 @@ def iter_python_files(paths: Iterable[Path | str]) -> Iterator[Path]:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.681446+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
 
 def _comment_block(lines: list[str], start_line: int) -> CommentBlock | None:
     block: list[str] = []
@@ -60,7 +60,7 @@ def _comment_block(lines: list[str], start_line: int) -> CommentBlock | None:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.681446+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
 
 class _ArtifactVisitor(ast.NodeVisitor):
     """Collect function and class definitions along with metadata."""
@@ -70,7 +70,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.681446+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
     
     def __init__(self, path: Path, lines: list[str]) -> None:
         self._path = path
@@ -83,7 +83,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.681446+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
     
     def visit_ClassDef(self, node: ast.ClassDef) -> None:  # noqa: N802 - AST API
         self._visit_named_node(node, "class")
@@ -96,7 +96,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.681446+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
     
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
         self._visit_named_node(node, "function")
@@ -109,7 +109,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.681446+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
     
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:  # noqa: N802
         self._visit_named_node(node, "async_function")
@@ -122,7 +122,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.681446+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
     
     def _visit_named_node(self, node: ast.AST, artifact_type: str) -> None:
         name = getattr(node, "name", "<anonymous>")
@@ -150,7 +150,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
     # scrutiny: auto
     # date: 2025-11-08T00:34:45.681446+00:00
     # notes: bulk annotation
-    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    # history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
     
     @staticmethod
     def _artifact_start_line(node: ast.AST) -> int:
@@ -165,7 +165,7 @@ class _ArtifactVisitor(ast.NodeVisitor):
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.681446+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
 
 def _indent_for_line(lines: list[str], line_number: int) -> str:
     if 1 <= line_number <= len(lines):
@@ -179,7 +179,7 @@ def _indent_for_line(lines: list[str], line_number: int) -> str:
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.681446+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T00:54:54.001376+00:00 digest=aeb9aa0aa3a419d2fb07fb2b0be0b2692e91c1b3 last_commit=f07d0d9 by phzwart
 
 def parse_file(path: Path) -> Sequence[CodeArtifact]:
     """Parse a Python file and extract provenance metadata."""
