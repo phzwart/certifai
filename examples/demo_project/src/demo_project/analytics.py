@@ -1,0 +1,51 @@
+"""Example analytics functions demonstrating certifai metadata."""
+
+from __future__ import annotations
+
+from statistics import mean
+from typing import Iterable
+
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+def compute_accuracy(predictions: Iterable[int], labels: Iterable[int]) -> float:
+    """Return simple classification accuracy."""
+
+    preds = list(predictions)
+    actuals = list(labels)
+    if len(preds) != len(actuals):
+        raise ValueError("Prediction and label lengths differ")
+    matches = sum(1 for pred, actual in zip(preds, actuals, strict=True) if pred == actual)
+    return matches / len(preds) if preds else 0.0
+
+
+# @ai_composed: claude-sonnet
+# @human_certified: Mentor
+# scrutiny: high
+# date: 2025-10-12
+# notes: Benchmarked across synthetic data set
+def compute_macro_f1(scores: Iterable[tuple[float, float]]) -> float:
+    """Compute macro-averaged F1 score from (precision, recall) tuples."""
+
+    values = list(scores)
+    f1_values = []
+    for precision, recall in values:
+        if precision + recall == 0:
+            f1_values.append(0.0)
+        else:
+            f1_values.append(2 * precision * recall / (precision + recall))
+    return mean(f1_values) if f1_values else 0.0
+
+
+def summarize_predictions(predictions: Iterable[float]) -> dict[str, float]:
+    """Return simple summary metrics for model predictions.
+
+    This function intentionally lacks metadata so that `certifai annotate`
+    can demonstrate auto-tag insertion during the demo walkthrough.
+    """
+
+    values = list(predictions)
+    if not values:
+        return {"count": 0, "average": 0.0}
+    return {"count": len(values), "average": mean(values)}

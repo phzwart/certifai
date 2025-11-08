@@ -1,0 +1,6 @@
+- id: certifai
+  name: certifai provenance annotator
+  entry: certifai-pre-commit
+  language: python
+  types: [python]
+  require_serial: true

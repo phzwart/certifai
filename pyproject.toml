@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "certifai"
+version = "0.1.0"
+description = "Human–AI code certification toolkit"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "certifai maintainers" }
+]
+requires-python = ">=3.10"
+dependencies = [
+  "click>=8.1,<9",
+  "pyyaml>=6.0",
+  "regex>=2024.5",
+  "rich>=13",
+  "gitpython>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "coverage[toml]>=7.4",
+  "nox>=2024.4.15",
+]
+
+[project.scripts]
+certifai = "certifai.cli:main"
+certifai-pre-commit = "certifai.hooks:main"
+
+[tool.setuptools]
+packages = { find = {} }
+
+[tool.setuptools.package-data]
+certifai = ["py.typed"]
+
+[tool.coverage.run]
+branch = true
+source = ["certifai"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.certifai]
+default_agent = "pending"
+notes_template = "auto-tagged by certifai"

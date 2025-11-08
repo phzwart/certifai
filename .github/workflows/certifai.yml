@@ -1,0 +1,45 @@
+name: certifai
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[dev]
+          pip install nox
+
+      - name: Run unit tests
+        run: nox --session=tests
+
+      - name: Coverage report
+        run: nox --session=coverage
+
+      - name: Generate certifai report
+        run: certifai report --format md . > certifai_report.md
+
+      - name: Upload certification report
+        uses: actions/upload-artifact@v4
+        with:
+          name: certifai-report
+          path: certifai_report.md
+
+      - name: Upload coverage XML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml

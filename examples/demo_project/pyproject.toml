@@ -1,0 +1,10 @@
+[project]
+name = "demo-project"
+version = "0.1.0"
+description = "Demonstration project for the certifai toolkit"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.certifai]
+default_paths = ["src/demo_project"]
