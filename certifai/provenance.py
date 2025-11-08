@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from .decorators import certifai, format_metadata_decorator
 from .history import build_history_entry, compute_digest, extract_digest
 from .metadata import MetadataUpdate, update_metadata_blocks
 from .models import CodeArtifact, ScrutinyLevel, TagMetadata
@@ -17,13 +18,16 @@ from .utils.logging import get_logger
 LOGGER = get_logger("provenance")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.918067+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.918067+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart",
+    ],
+)
 @dataclass(slots=True)
 class ProvenanceResult:
     """Result of running provenance annotation on a set of files."""
@@ -33,13 +37,16 @@ class ProvenanceResult:
     policy_violations: list[str]
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.918067+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.918067+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def annotate_paths(
     paths: Iterable[Path | str],
     *,
@@ -64,7 +71,7 @@ def annotate_paths(
             needs_update = [artifact for artifact in artifacts if not artifact.tags.has_metadata]
         if needs_update:
             LOGGER.debug("Annotating %s with %d metadata blocks", path, len(needs_update))
-            if _insert_metadata_blocks(
+            if _ensure_metadata_decorators(
                 path,
                 needs_update,
                 ai_agent=ai_agent,
@@ -90,13 +97,16 @@ def annotate_paths(
     )
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.918067+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.918067+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> list[str]:
     """Return a list of policy violations detected for the given artifacts."""
 
@@ -134,14 +144,17 @@ def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> l
     return violations
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.918067+00:00
-# notes: bulk annotation
-# history: 2025-11-08T01:22:48.035474+00:00 digest=aff21f4e5f07604c1d3c2dfdc5c8260d91621e0a last_commit=f07d0d9 by phzwart
-
-def _insert_metadata_blocks(
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.918067+00:00",
+    notes="bulk annotation",
+    history=[
+        "2025-11-08T01:22:48.035474+00:00 digest=aff21f4e5f07604c1d3c2dfdc5c8260d91621e0a last_commit=f07d0d9 by phzwart",
+    ],
+)
+def _ensure_metadata_decorators(
     path: Path,
     artifacts: Sequence[CodeArtifact],
     *,
@@ -175,14 +188,11 @@ def _insert_metadata_blocks(
             )
         ]
 
-        block = metadata.to_comment_block()
-        if not block:
+        decorator_lines = format_metadata_decorator(metadata, indent=artifact.indent)
+        if not decorator_lines:
             continue
-        indented_block = [f"{artifact.indent}{line}" for line in block]
         insertion_index = artifact.start_line - 1
-        # Avoid duplicating existing blank line: ensure trailing newline between block and code
-        indented_block.append(artifact.indent)
-        lines[insertion_index:insertion_index] = indented_block
+        lines[insertion_index:insertion_index] = decorator_lines
         changed = True
 
     if changed:
@@ -190,13 +200,16 @@ def _insert_metadata_blocks(
     return changed
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:54:54.247217+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.035474+00:00 digest=0002e726fdd176050dec9ac0e6cdf3cd90c641f9 last_commit=97cec9a by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:54:54.247217+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.035474+00:00 digest=0002e726fdd176050dec9ac0e6cdf3cd90c641f9 last_commit=97cec9a by phzwart",
+    ],
+)
 def _refresh_history_blocks(
     path: Path,
     artifacts: Sequence[CodeArtifact],
@@ -206,7 +219,7 @@ def _refresh_history_blocks(
     effective_timestamp = timestamp or datetime.now(timezone.utc)
 
     for artifact in artifacts:
-        if artifact.comment_block is None:
+        if artifact.decorator is None:
             continue
 
         metadata = artifact.tags.clone()

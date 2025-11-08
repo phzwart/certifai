@@ -9,14 +9,18 @@ from typing import Optional
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError
 
+from certifai.decorators import certifai
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.129767+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:24:35.335455+00:00 digest=98d5bcde7c7e9d363c1723dcc08ac137b85262a6 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.129767+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:24:35.335455+00:00 digest=98d5bcde7c7e9d363c1723dcc08ac137b85262a6 last_commit=f07d0d9 by phzwart",
+    ],
+)
 @lru_cache(maxsize=1)
 def get_repo(start_path: Path | None = None) -> Optional[Repo]:
     """Return a GitPython Repo rooted at or above the provided path."""
@@ -28,13 +32,16 @@ def get_repo(start_path: Path | None = None) -> Optional[Repo]:
         return None
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.129767+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:24:35.335455+00:00 digest=98d5bcde7c7e9d363c1723dcc08ac137b85262a6 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.129767+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:24:35.335455+00:00 digest=98d5bcde7c7e9d363c1723dcc08ac137b85262a6 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def describe_line(path: Path, lineno: int) -> dict[str, str] | None:
     """Return commit metadata for a specific line within a file."""
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import nox
 
+from certifai.decorators import certifai
+
 
 PYTHON_VERSIONS = ["3.11"]
 TEST_DEPENDENCIES = [
@@ -17,13 +19,16 @@ TEST_DEPENDENCIES = [
 ]
 
 
-# @ai_composed: pending
-# @human_certified: PHZ
-# scrutiny: high
-# date: 2025-11-08T01:38:57.476668+00:00
-# notes: manual review
-# history: 2025-11-08T01:38:57.476668+00:00 digest=0d0dbbebf6a45e1b4c60034d36bb18c481d4928d certified by PHZ (high) last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="pending",
+    human_certified="PHZ",
+    scrutiny="high",
+    date="2025-11-08T01:38:57.476668+00:00",
+    notes="manual review",
+    history=[
+        "2025-11-08T01:38:57.476668+00:00 digest=0d0dbbebf6a45e1b4c60034d36bb18c481d4928d certified by PHZ (high) last_commit=f07d0d9 by phzwart",
+    ],
+)
 @nox.session(python=PYTHON_VERSIONS)
 def tests(session: nox.Session) -> None:
     """Run the unit test suite."""
@@ -33,13 +38,16 @@ def tests(session: nox.Session) -> None:
     session.run("pytest", "tests")
 
 
-# @ai_composed: pending
-# @human_certified: PHZ
-# scrutiny: high
-# date: 2025-11-08T01:38:57.476668+00:00
-# notes: manual review
-# history: 2025-11-08T01:38:57.476668+00:00 digest=0d0dbbebf6a45e1b4c60034d36bb18c481d4928d certified by PHZ (high) last_commit=uncommitted
-
+@certifai(
+    ai_composed="pending",
+    human_certified="PHZ",
+    scrutiny="high",
+    date="2025-11-08T01:38:57.476668+00:00",
+    notes="manual review",
+    history=[
+        "2025-11-08T01:38:57.476668+00:00 digest=0d0dbbebf6a45e1b4c60034d36bb18c481d4928d certified by PHZ (high) last_commit=uncommitted",
+    ],
+)
 @nox.session(python=PYTHON_VERSIONS)
 def coverage(session: nox.Session) -> None:
     """Run the test suite with coverage reporting."""

@@ -11,8 +11,10 @@ from typing import Optional
 import click
 
 from . import __version__
+from .decorators import certifai
 from .certify import certify as certify_artifacts
 from .certify import verify_all as verify_artifacts
+from .finalize import finalize as finalize_artifacts
 from .policy import load_policy
 from .provenance import annotate_paths
 from .report import (
@@ -26,25 +28,31 @@ from .utils.logging import get_logger
 LOGGER = get_logger("cli")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 def _configure_logging(verbose: bool) -> None:
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format="[%(levelname)s] %(message)s")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @click.group()
 @click.option("--verbose", is_flag=True, help="Enable verbose logging output.")
 @click.version_option(version=__version__)
@@ -54,17 +62,20 @@ def cli(verbose: bool) -> None:
     _configure_logging(verbose)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 @click.option("--ai-agent", default="pending", show_default=True, help="Label to use for @ai_composed metadata.")
-@click.option("--notes", default="auto-tagged by certifai", show_default=True, help="Notes comment to include when inserting metadata.")
+@click.option("--notes", default="auto-tagged by certifai", show_default=True, help="Notes text to include when inserting metadata.")
 @click.option("--policy", type=click.Path(path_type=Path), help="Path to a .certifai.yml policy file.")
 def annotate(paths: tuple[Path, ...], ai_agent: str, notes: str, policy: Path | None) -> None:
     """Insert provenance metadata for unannotated artifacts."""
@@ -81,13 +92,16 @@ def annotate(paths: tuple[Path, ...], ai_agent: str, notes: str, policy: Path | 
         raise SystemExit(1)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: high
-# date: 2025-11-08T01:38:57.432588+00:00
-# notes: manual review
-# history: 2025-11-08T01:38:57.432588+00:00 digest=139418d81d1ecdc479bcd4da96fbf8c6e10cf5c1 certified by PHZ (high) last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="high",
+    date="2025-11-08T01:38:57.432588+00:00",
+    notes="manual review",
+    history=[
+        "2025-11-08T01:38:57.432588+00:00 digest=139418d81d1ecdc479bcd4da96fbf8c6e10cf5c1 certified by PHZ (high) last_commit=f07d0d9 by phzwart",
+    ],
+)
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 @click.option("--reviewer", required=True, help="Reviewer identifier for certification.")
@@ -102,25 +116,42 @@ def certify(paths: tuple[Path, ...], reviewer: str, scrutiny: str, notes: str | 
     click.echo(f"Certified {len(updated)} artifact(s).")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
+@cli.command()
+@click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
+@click.option("--registry-root", type=click.Path(path_type=Path), help="Optional base path for the registry manifest.")
+def finalize(paths: tuple[Path, ...], registry_root: Path | None) -> None:
+    """Finalize certified artifacts and move provenance to the registry."""
 
+    target_paths = paths or (Path.cwd(),)
+    finalized = finalize_artifacts(target_paths, registry_root=registry_root)
+    click.echo(f"Finalized {len(finalized)} artifact(s).")
+
+
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @cli.group()
 def verify() -> None:
     """Verification commands."""
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @verify.command("all")
 @click.option("--reviewer", required=True, help="Reviewer identifier for verification.")
 @click.option("--scrutiny", help="Optional scrutiny level override.")
@@ -131,13 +162,16 @@ def verify_all(reviewer: str, scrutiny: str | None) -> None:
     click.echo(f"Verified {len(updated)} artifact(s).")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 @click.option(
@@ -162,13 +196,16 @@ def report(paths: tuple[Path, ...], output_format: str) -> None:
         click.echo(emit_text_report(summary))
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 def badge(paths: tuple[Path, ...]) -> None:
@@ -186,25 +223,31 @@ def badge(paths: tuple[Path, ...]) -> None:
     click.echo(f"![certifai Coverage]({badge_url})")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @cli.group()
 def config() -> None:
     """Configuration helpers."""
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 @config.command("show")
 @click.option("--path", type=click.Path(path_type=Path), help="Optional path to a policy file.")
 def config_show(path: Path | None) -> None:
@@ -220,13 +263,16 @@ def config_show(path: Path | None) -> None:
     }, indent=2))
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.799864+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart",
+    ],
+)
 def main(argv: Optional[list[str]] = None) -> int:
     """Entry point used by console script entry point."""
 

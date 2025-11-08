@@ -1,4 +1,4 @@
-"""Helpers for building provenance history comment entries."""
+"""Helpers for building provenance history entries."""
 
 from __future__ import annotations
 
@@ -7,19 +7,23 @@ import re
 from datetime import datetime, timezone
 from typing import Optional
 
+from .decorators import certifai
 from .models import CodeArtifact, TagMetadata
 from .utils.git import describe_line, get_repo
 
 _DIGEST_PATTERN = re.compile(r"digest=([0-9a-f]{40})")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:54:54.476559+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:54:54.476559+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart",
+    ],
+)
 def compute_digest(metadata: TagMetadata) -> str:
     """Return a stable digest representing the metadata content."""
 
@@ -30,18 +34,22 @@ def compute_digest(metadata: TagMetadata) -> str:
         metadata.date or "",
         metadata.notes or "",
         "\n".join(metadata.extras),
+        "done" if metadata.done else "",
     ]
     joined = "|".join(parts)
     return hashlib.sha1(joined.encode("utf-8")).hexdigest()
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:54:54.476559+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:54:54.476559+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart",
+    ],
+)
 def extract_digest(entry: str | None) -> Optional[str]:
     """Extract the stored digest from a history entry if present."""
 
@@ -53,13 +61,16 @@ def extract_digest(entry: str | None) -> Optional[str]:
     return None
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:54:54.476559+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:54:54.476559+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart",
+    ],
+)
 def build_history_entry(
     artifact: CodeArtifact,
     metadata: TagMetadata,

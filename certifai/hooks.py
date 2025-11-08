@@ -6,6 +6,8 @@ import argparse
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from .decorators import certifai
+from .checks import reconcile_registry
 from .policy import load_policy
 from .provenance import annotate_paths
 from .utils.logging import get_logger
@@ -13,13 +15,16 @@ from .utils.logging import get_logger
 LOGGER = get_logger("hooks")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.475775+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.475775+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def run_pre_commit(
     paths: Iterable[str],
     *,
@@ -27,6 +32,10 @@ def run_pre_commit(
     block_on_violation: bool = True,
 ) -> int:
     """Run the certifai pre-commit hook against the supplied paths."""
+
+    reopened = reconcile_registry()
+    for path in reopened:
+        LOGGER.info("certifai reopened finalized artifacts in %s", path)
 
     policy = load_policy()
     result = annotate_paths(paths, ai_agent=ai_agent, policy=policy)
@@ -40,13 +49,16 @@ def run_pre_commit(
     return 0
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.475775+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.475775+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="certifai pre-commit hook")
     parser.add_argument("paths", nargs="*", help="Files to inspect")
@@ -64,13 +76,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(argv)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.475775+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.475775+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     exit_code = run_pre_commit(

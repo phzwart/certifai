@@ -6,22 +6,26 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Sequence
 
+from .decorators import certifai
 from .history import build_history_entry
 from .metadata import MetadataUpdate, update_metadata_blocks
-from .models import CodeArtifact, CommentBlock, ScrutinyLevel, TagMetadata  # pyright: ignore[reportUnusedImport]
+from .models import CodeArtifact, ScrutinyLevel, TagMetadata  # pyright: ignore[reportUnusedImport]
 from .parser import iter_python_files, parse_file
 from .utils.logging import get_logger
 
 LOGGER = get_logger("certify")
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.964853+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.964853+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart",
+    ],
+)
 def certify(
     paths: Iterable[Path | str],
     reviewer: str,
@@ -59,13 +63,16 @@ def certify(
     return updated_artifacts
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.964853+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.964853+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart",
+    ],
+)
 def verify_all(
     reviewer: str,
     *,
@@ -81,13 +88,16 @@ def verify_all(
     return certify(target_paths, reviewer, level.value, include_existing=False)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.964853+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.964853+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart",
+    ],
+)
 def _rewrite_metadata(
     path: Path,
     artifacts: Sequence[CodeArtifact],
@@ -101,10 +111,10 @@ def _rewrite_metadata(
     updates_payload: list[MetadataUpdate] = []
 
     for artifact in artifacts:
-        comment_block = artifact.comment_block
-        if comment_block is None:
+        decorator_block = artifact.decorator
+        if decorator_block is None:
             LOGGER.warning(
-                "Artifact %s at %s lacks metadata block; skipping certification",
+                "Artifact %s at %s lacks metadata decorator; skipping certification",
                 artifact.name,
                 path,
             )
@@ -115,6 +125,7 @@ def _rewrite_metadata(
         metadata.date = timestamp
         if notes:
             metadata.notes = notes
+        metadata.done = False
         metadata.history = [
             build_history_entry(
                 artifact,

@@ -7,17 +7,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
+from .decorators import certifai
 from .models import CodeArtifact, ScrutinyLevel
 from .parser import iter_python_files, parse_file
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.021164+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.021164+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+    ],
+)
 @dataclass(slots=True)
 class CoverageSummary:
     """A structured summary of certification coverage metrics."""
@@ -29,13 +33,16 @@ class CoverageSummary:
     pending_review: int
     scrutiny_counts: Mapping[str, int]
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:46.021164+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:46.021164+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     @property
     def coverage_ratio(self) -> float:
         """Return certified-to-total coverage ratio."""
@@ -44,13 +51,16 @@ class CoverageSummary:
             return 0.0
         return self.human_certified / self.total_functions
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:46.021164+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:46.021164+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serialisable representation of the summary."""
 
@@ -64,13 +74,16 @@ class CoverageSummary:
         }
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.021164+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.021164+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
     """Inspect project sources and build a coverage summary."""
 
@@ -116,13 +129,16 @@ def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
     )
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.021164+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.021164+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def emit_text_report(summary: CoverageSummary) -> str:
     """Render a human-readable report for console output."""
 
@@ -141,13 +157,16 @@ def emit_text_report(summary: CoverageSummary) -> str:
     return "\n".join(lines)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.021164+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.021164+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def emit_csv_report(summary: CoverageSummary) -> str:
     """Return a CSV representation of the coverage metrics."""
 
@@ -169,13 +188,16 @@ def emit_csv_report(summary: CoverageSummary) -> str:
     return "\n".join(csv_lines)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.021164+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.021164+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def emit_markdown_table(summary: CoverageSummary) -> str:
     """Return a markdown table summarising coverage metrics."""
 
@@ -190,13 +212,16 @@ def emit_markdown_table(summary: CoverageSummary) -> str:
     return "\n".join([header, *rows])
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.021164+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.021164+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def github_actions_step() -> str:
     """Return a reusable GitHub Actions snippet for running certifai."""
 

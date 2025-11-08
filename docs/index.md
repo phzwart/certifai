@@ -4,32 +4,40 @@
 
 ## Tagging Schema
 
-Each function or class can be prefixed with a metadata header describing its provenance and review state:
+Each function or class is annotated with the `certifai` decorator to describe its provenance and review state:
 
 ```
-# @ai_composed: gpt-5
-# @human_certified: Reviewer
-# scrutiny: high
-# date: 2025-11-07
-# notes: logic verified, unit tested, compliant with policy
-# history: 2025-11-07T18:22:06Z inserted by certifai; last_commit=abc1234 by Reviewer
+from certifai.decorators import certifai
+
+
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="Reviewer",
+    scrutiny="high",
+    date="2025-11-07",
+    notes="logic verified, unit tested, compliant with policy",
+    history=[
+        "2025-11-07T18:22:06Z digest=abc123... annotated by certifai; last_commit=abc1234 by Reviewer",
+    ],
+)
 def normalize(df):
     ...
 ```
 
-- `@ai_composed` records which AI model or agent proposed the change (defaults to `pending`).
-- `@human_certified` names the reviewer responsible for human approval (`pending` until certified).
+- `ai_composed` records which AI model or agent proposed the change (defaults to `pending`).
+- `human_certified` names the reviewer responsible for human approval (`pending` until certified).
 - `scrutiny` captures review depth (`auto`, `low`, `medium`, `high`). Policies can require `high` for AI-authored code.
-- `date` is ISO 8601 timestamp of latest certification event.
+- `date` is ISO 8601 timestamp of the most recent certification event.
 - `notes` stores contextual review comments.
 - `history` tracks chronological provenance events, including automated insertions and the latest Git blame metadata.
+- `done` marks an artifact as finalized. When present, detailed provenance is stored in the central registry and the inline decorator collapses to a minimal form (for example `@certifai(done=True, human_certified="Reviewer")`).
 
 ### Insertion Algorithm
 
 - `certifai annotate` and the pre-commit hook scan Python files for untagged definitions.
-- Tag blocks are inserted immediately above the first decorator or definition line and inherit local indentation.
-- Git blame metadata of the definition line is appended to the `history` comment for traceability.
-- Existing developer comments directly above the definition are preserved, and non-schema comments remain in `TagMetadata.extras`.
+- `certifai` decorators are inserted immediately above the first existing decorator (if any) or the definition line, and inherit local indentation.
+- Git blame metadata of the definition line is appended to the `history` list for traceability.
+- Existing decorators and comments remain in place; metadata decorators are prepended without disturbing surrounding code.
 
 ## CLI Overview
 
@@ -60,6 +68,14 @@ Automatically inserts provenance headers for untagged artifacts, respecting `.ce
   ```
 
   Re-certifies all pending artifacts under a single reviewer, useful for final release audits.
+
+- **Finalize artifacts**:
+
+  ```bash
+  certifai finalize src/package --registry-root .
+  ```
+
+  Moves richly annotated metadata into `.certifai/registry.yml`, rewrites inline decorators to `@certifai(done=True, …)`, and records an implementation digest for each finalized function.
 
 ### Reporting & Badges
 
@@ -108,6 +124,8 @@ Prints the effective policy in JSON format, combining defaults and values resolv
           types: [python]
   ```
 
+- After annotation, the hook reconciles the registry: if any `done=True` artifact no longer matches its recorded digest, the entry is removed from `.certifai/registry.yml`, the inline decorator is expanded back to a full `@certifai(...)` block, and the function re-enters the certification queue.
+
 ## CI/CD Integration
 
 - Use the helper from `certifai.report.github_actions_step()` or embed manually:
@@ -133,8 +151,34 @@ Prints the effective policy in JSON format, combining defaults and values resolv
 4. **Traceability** – Leverage the `history` field and Git metadata to preserve review narratives and ensure reproducibility across audits.
 5. **Education** – Encourage mentors to annotate `notes` detailing their reasoning, promoting knowledge transfer for junior contributors pairing with AI systems.
 
+## Provenance Lifecycle
+
+certifai tracks the entire journey from AI draft to human-approved code:
+
+1. **Untracked** – No decorator present. Reporting surfaces these definitions as "unknown" so they can be queued for provenance tagging.
+2. **Pending annotation** – `@certifai(ai_composed=...)` is added automatically by `certifai annotate`. At this stage only the AI agent (and optional notes) are recorded.
+3. **Certified** – `certifai certify` updates the decorator with reviewer, scrutiny, notes, timestamps, and history entries. The artifact now meets policy but may still evolve.
+4. **Finalized** – `certifai finalize` collapses inline metadata to `@certifai(done=True, human_certified=...)`, stores rich history + a normalized AST digest in `.certifai/registry.yml`, and ensures the pre-commit hook tracks drift. Any future code change invalidates the digest, automatically re-expands the decorator, and re-queues the function for review.
+
+Reports treat pending and finalized artifacts differently, letting teams monitor certification coverage, regression reopenings, and overall review throughput.
+
+## Alignment with the C.L.E.A.R. Review Framework
+
+certifai’s workflows map directly onto the C.L.E.A.R. approach for AI-generated code reviews [^1]:
+
+- **Context Establishment** – Inline provenance captures prompts, reviewers, scrutiny levels, and timestamps so reviewers arrive with complete context.
+- **Layered Examination** – Coverage and registry reports enumerate all module artifacts, making it easy to review structure first, then logic, security, performance, and style in focused passes.
+- **Explicit Verification** – Certification requires explicit reviewer notes and history entries; finalization preserves these in the registry, and any digest mismatch forces another verification cycle.
+- **Alternative Consideration** – Notes and history fields double as decision logs, while registry snapshots capture evolution across alternative designs.
+- **Refactoring Recommendations** – Reports flag pending items, reopened artifacts, and coverage deltas so teams can turn review findings into actionable follow-ups.
+
+By combining provenance tagging, policy checks, and digest-backed finalization, certifai operationalizes the CLEAR methodology in day-to-day Git workflows.
+
+[^1]: [Vibe Coding Framework – Code Review Guidelines](https://docs.vibe-coding-framework.com/best-practices/code-review-guidelines)
+
 ## Additional Resources
 
+- The `.certifai/registry.yml` manifest reflects the current set of finalized artifacts and their digests. Treat it like other provenance files—commit it alongside code changes.
 - The `examples/demo_project` directory illustrates end-to-end onboarding.
 - Use `certifai report --format json` to feed dashboards or longitudinal analyses tracking human review coverage over time.
-- Extend the schema by appending custom `# notes:` or `# history:` entries—unknown comment lines are preserved for forward compatibility.
+- Extend the schema by passing extra keyword arguments to the decorator—unknown keys are preserved via `TagMetadata.extras` for forward compatibility.

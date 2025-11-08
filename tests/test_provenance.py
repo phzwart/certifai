@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from certifai.decorators import certifai
 from certifai.history import compute_digest, extract_digest
 from certifai.models import ScrutinyLevel
 from certifai.policy import EnforcementSettings, PolicyConfig
@@ -9,13 +10,16 @@ from certifai.provenance import annotate_paths, enforce_policy
 from certifai.parser import parse_file
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.195047+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:35:22.575831+00:00 digest=639af9a937d6a9584bd88916db362d52f1313429 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.195047+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:35:22.575831+00:00 digest=639af9a937d6a9584bd88916db362d52f1313429 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def test_annotate_paths_inserts_metadata(tmp_path: Path) -> None:
     module = tmp_path / "sample.py"
     module.write_text(
@@ -40,13 +44,16 @@ def add(a, b):
     assert digest == compute_digest(refreshed[0].tags)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:54:54.717034+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:35:22.575831+00:00 digest=d5cc63e098dc5bce0898ee26804712542260c783 last_commit=97cec9a by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:54:54.717034+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:35:22.575831+00:00 digest=d5cc63e098dc5bce0898ee26804712542260c783 last_commit=97cec9a by phzwart",
+    ],
+)
 def test_history_updates_when_metadata_changes(tmp_path: Path) -> None:
     module = tmp_path / "tracked.py"
     module.write_text(
@@ -64,7 +71,7 @@ def target():
 
     module.write_text(
         module.read_text(encoding="utf-8").replace(
-            "@human_certified: pending", "@human_certified: PHZ" #this is ok, just a test
+            'human_certified="pending"', 'human_certified="PHZ"'  # this is ok, just a test
         ),
         encoding="utf-8",
     )
@@ -77,19 +84,24 @@ def target():
     assert updated_digest == compute_digest(updated.tags)
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.195047+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:35:22.575831+00:00 digest=639af9a937d6a9584bd88916db362d52f1313429 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:46.195047+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:35:22.575831+00:00 digest=639af9a937d6a9584bd88916db362d52f1313429 last_commit=f07d0d9 by phzwart",
+    ],
+)
 def test_enforce_policy_checks_scrutiny(tmp_path: Path) -> None:
     module = tmp_path / "policy_case.py"
     module.write_text(
         """
-# @ai_composed: gpt-5
-# @human_certified: pending
+from certifai.decorators import certifai
+
+
+@certifai(ai_composed="gpt-5", human_certified="pending")
 def risky():
     return 42
 """.strip()
@@ -110,13 +122,16 @@ def risky():
     assert not violations
 
 
-# @ai_composed: cursor
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T01:10:38.980744+00:00
-# notes: auto-tagged by certifai
-# history: 2025-11-08T01:35:22.575831+00:00 digest=d0f19a4030babe0a7169859176b39e28e87d84f7 last_commit=uncommitted
-
+@certifai(
+    ai_composed="cursor",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T01:10:38.980744+00:00",
+    notes="auto-tagged by certifai",
+    history=[
+        "2025-11-08T01:35:22.575831+00:00 digest=d0f19a4030babe0a7169859176b39e28e87d84f7 last_commit=uncommitted",
+    ],
+)
 def test_enforce_policy_coverage_ignores_classes(tmp_path: Path) -> None:
     module = tmp_path / "classes_only.py"
     module.write_text(
@@ -140,19 +155,24 @@ class Sample:
     assert not violations
 
 
-# @ai_composed: cursor
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T01:10:38.980744+00:00
-# notes: auto-tagged by certifai
-# history: 2025-11-08T01:35:22.575831+00:00 digest=d0f19a4030babe0a7169859176b39e28e87d84f7 last_commit=uncommitted
-
+@certifai(
+    ai_composed="cursor",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T01:10:38.980744+00:00",
+    notes="auto-tagged by certifai",
+    history=[
+        "2025-11-08T01:35:22.575831+00:00 digest=d0f19a4030babe0a7169859176b39e28e87d84f7 last_commit=uncommitted",
+    ],
+)
 def test_enforce_policy_coverage_counts_functions(tmp_path: Path) -> None:
     module = tmp_path / "function_only.py"
     module.write_text(
         """
-# @ai_composed: gpt-5
-# @human_certified: pending
+from certifai.decorators import certifai
+
+
+@certifai(ai_composed="gpt-5", human_certified="pending")
 def pending():
     return 1
 """.strip()
@@ -176,13 +196,16 @@ def pending():
     assert not violations
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: high
-# date: 2025-11-08T00:54:54.717034+00:00
-# notes: manual review
-# history: 2025-11-08T01:43:04.837083+00:00 digest=e429bda58461c056c95eb93ab80918c959e5eaa1 last_commit=uncommitted
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="high",
+    date="2025-11-08T00:54:54.717034+00:00",
+    notes="manual review",
+    history=[
+        "2025-11-08T01:43:04.837083+00:00 digest=e429bda58461c056c95eb93ab80918c959e5eaa1 last_commit=uncommitted",
+    ],
+)
 def test_ignore_unannotated_skips_auto_tagging(tmp_path: Path) -> None:
     module = tmp_path / "skip.py"
     module.write_text("def pending():\n    return 1\n", encoding="utf-8")
@@ -204,13 +227,16 @@ def test_ignore_unannotated_skips_auto_tagging(tmp_path: Path) -> None:
     assert not violations
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: high
-# date: 2025-11-08T00:54:54.717034+00:00
-# notes: manual review
-# history: 2025-11-08T01:43:04.837083+00:00 digest=e429bda58461c056c95eb93ab80918c959e5eaa1 last_commit=uncommitted
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="high",
+    date="2025-11-08T00:54:54.717034+00:00",
+    notes="manual review",
+    history=[
+        "2025-11-08T01:43:04.837083+00:00 digest=e429bda58461c056c95eb93ab80918c959e5eaa1 last_commit=uncommitted",
+    ],
+)
 def test_ignore_unannotated_excludes_from_coverage(tmp_path: Path) -> None:
     module = tmp_path / "coverage.py"
     module.write_text("def pending():\n    return 1\n", encoding="utf-8")

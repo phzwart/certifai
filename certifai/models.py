@@ -5,15 +5,27 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
+from typing import Callable, Sequence, TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from certifai.decorators import certifai
+else:
+    def certifai(**_: object) -> Callable[[object], object]:
+        def _decorator(target: object) -> object:
+            return target
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.515259+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
+        return _decorator
 
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.515259+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+    ],
+)
 class ScrutinyLevel(str, Enum):
     """Enumeration of supported scrutiny levels."""
 
@@ -22,13 +34,16 @@ class ScrutinyLevel(str, Enum):
     MEDIUM = "medium"
     HIGH = "high"
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:45.515259+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:45.515259+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     @classmethod
     def from_string(cls, value: str | None) -> ScrutinyLevel | None:
         """Normalize a string into a scrutiny level if recognized."""
@@ -42,13 +57,16 @@ class ScrutinyLevel(str, Enum):
         return None
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.515259+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.515259+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+    ],
+)
 @dataclass(slots=True)
 class TagMetadata:
     """Structured representation of provenance metadata associated with code."""
@@ -60,84 +78,80 @@ class TagMetadata:
     notes: str | None = None
     history: list[str] = field(default_factory=list)
     extras: list[str] = field(default_factory=list)
+    done: bool = False
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:45.515259+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:35:22.567845+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:45.515259+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:35:22.567845+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     @classmethod
-    def from_comment_block(cls, lines: list[str]) -> TagMetadata:
-        """Create a metadata object from raw comment lines."""
-
+    def from_decorator_kwargs(
+        cls,
+        *,
+        ai_composed: str | None = None,
+        human_certified: str | None = None,
+        scrutiny: ScrutinyLevel | str | None = None,
+        date: str | None = None,
+        notes: str | None = None,
+        history: Sequence[str] | None = None,
+        extras: Sequence[str] | None = None,
+        done: bool | str | None = None,
+    ) -> TagMetadata:
         metadata = cls()
-        for line in lines:
-            content = line.lstrip("#").strip()
-            if not content:
-                continue
-            if content.startswith("@"):
-                key, _, value = content[1:].partition(":")
-                key = key.strip().lower()
-                value = value.strip() or None
-                if key == "ai_composed":
-                    metadata.ai_composed = value
-                elif key == "human_certified":
-                    metadata.human_certified = value or "pending"
-                else:
-                    metadata.extras.append(line)
-                    continue
-            else:
-                key, _, value = content.partition(":")
-                key = key.strip().lower()
-                value = value.strip() or None
-                if key == "scrutiny":
-                    metadata.scrutiny = ScrutinyLevel.from_string(value)
-                elif key == "date":
-                    metadata.date = value
-                elif key == "notes":
-                    metadata.notes = value
-                elif key == "history":
-                    if value:
-                        metadata.history.append(value)
-                else:
-                    metadata.extras.append(line)
+        metadata.ai_composed = ai_composed
+        metadata.human_certified = human_certified or ("pending" if human_certified == "" else human_certified)
+        if isinstance(scrutiny, ScrutinyLevel):
+            metadata.scrutiny = scrutiny
+        else:
+            metadata.scrutiny = ScrutinyLevel.from_string(scrutiny) if isinstance(scrutiny, str) else None
+        metadata.date = date
+        metadata.notes = notes
+        if history:
+            metadata.history = list(history)
+        if extras:
+            metadata.extras = list(extras)
+        if isinstance(done, bool):
+            metadata.done = done
+        elif isinstance(done, str):
+            metadata.done = done.strip().lower() in {"true", "1", "yes"}
         return metadata
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:45.515259+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-    
-    def to_comment_block(self) -> list[str]:
-        """Serialize metadata back into a sequence of comment lines."""
-
-        lines: list[str] = []
+    def to_decorator_payload(self) -> dict[str, object]:
+        payload: dict[str, object] = {}
         if self.ai_composed:
-            lines.append(f"# @ai_composed: {self.ai_composed}")
+            payload["ai_composed"] = self.ai_composed
         if self.human_certified:
-            lines.append(f"# @human_certified: {self.human_certified}")
+            payload["human_certified"] = self.human_certified
         if self.scrutiny:
-            lines.append(f"# scrutiny: {self.scrutiny.value}")
+            payload["scrutiny"] = self.scrutiny.value
         if self.date:
-            lines.append(f"# date: {self.date}")
+            payload["date"] = self.date
         if self.notes:
-            lines.append(f"# notes: {self.notes}")
-        for entry in self.history:
-            lines.append(f"# history: {entry}")
-        lines.extend(self.extras)
-        return lines
+            payload["notes"] = self.notes
+        if self.done:
+            payload["done"] = True
+        if self.history:
+            payload["history"] = list(self.history)
+        if self.extras:
+            payload["extras"] = list(self.extras)
+        return payload
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:45.515259+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:45.515259+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     def clone(self) -> TagMetadata:
         """Return a deep-ish copy suitable for mutation."""
 
@@ -149,15 +163,19 @@ class TagMetadata:
             notes=self.notes,
             history=list(self.history),
             extras=list(self.extras),
+            done=self.done,
         )
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:45.515259+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:45.515259+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     @property
     def has_metadata(self) -> bool:
         """Return True when any primary metadata field is populated."""
@@ -170,46 +188,58 @@ class TagMetadata:
                 self.scrutiny,
                 self.date,
                 self.notes,
+                self.done,
             )
         )
 
-    # @ai_composed: gpt-5
-    # @human_certified: PHZ
-    # scrutiny: auto
-    # date: 2025-11-08T00:34:45.515259+00:00
-    # notes: No obvious issues found.
-    # history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-    
+    @certifai(
+        ai_composed="gpt-5",
+        human_certified="PHZ",
+        scrutiny="auto",
+        date="2025-11-08T00:34:45.515259+00:00",
+        notes="No obvious issues found.",
+        history=[
+            "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+        ],
+    )
     @property
     def is_pending_certification(self) -> bool:
         """Return True if the artifact still requires human certification."""
 
+        if self.done:
+            return False
         return not self.human_certified or self.human_certified.lower() == "pending"
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.515259+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.515259+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+    ],
+)
 @dataclass(slots=True)
-class CommentBlock:
-    """Represents a contiguous comment block preceding an artifact."""
+class DecoratorBlock:
+    """Represents a provenance decorator applied to an artifact."""
 
     start_line: int
     end_line: int
     lines: list[str]
 
 
-# @ai_composed: gpt-5
-# @human_certified: PHZ
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.515259+00:00
-# notes: No obvious issues found.
-# history: 2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart
-
+@certifai(
+    ai_composed="gpt-5",
+    human_certified="PHZ",
+    scrutiny="auto",
+    date="2025-11-08T00:34:45.515259+00:00",
+    notes="No obvious issues found.",
+    history=[
+        "2025-11-08T01:22:48.177963+00:00 digest=194cdcdbb9a1aa5a6aa59cc2100e953ceee541d3 last_commit=f07d0d9 by phzwart",
+    ],
+)
 @dataclass(slots=True)
 class CodeArtifact:
     """Represents a function or class discovered in a Python module."""
@@ -222,4 +252,4 @@ class CodeArtifact:
     start_line: int
     tags: TagMetadata
     indent: str
-    comment_block: CommentBlock | None
+    decorator: DecoratorBlock | None
