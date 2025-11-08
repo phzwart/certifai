@@ -5,12 +5,26 @@ from pathlib import Path
 from certifai.policy import EnforcementSettings, PolicyConfig, load_policy
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.249248+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.249248+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def test_load_policy_defaults_when_missing(tmp_path: Path) -> None:
     policy = load_policy(tmp_path / ".certifai.yml")
     assert isinstance(policy, PolicyConfig)
     assert policy.enforcement.ai_composed_requires_high_scrutiny is True
     assert policy.enforcement.min_coverage is None
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.249248+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.249248+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def test_load_policy_from_file(tmp_path: Path) -> None:
     config = tmp_path / ".certifai.yml"

@@ -8,6 +8,13 @@ from certifai.provenance import annotate_paths, enforce_policy
 from certifai.parser import parse_file
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.195047+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.195047+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def test_annotate_paths_inserts_metadata(tmp_path: Path) -> None:
     module = tmp_path / "sample.py"
     module.write_text(
@@ -28,6 +35,13 @@ def add(a, b):
     assert refreshed[0].tags.notes == "auto"
     assert refreshed[0].tags.history, "history entries should be recorded"
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.195047+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.195047+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def test_enforce_policy_checks_scrutiny(tmp_path: Path) -> None:
     module = tmp_path / "policy_case.py"

@@ -9,6 +9,13 @@ from typing import Iterable, Iterator, Sequence
 from .models import CodeArtifact, CommentBlock, ScrutinyLevel, TagMetadata
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.681446+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def iter_python_files(paths: Iterable[Path | str]) -> Iterator[Path]:
     """Yield Python files from the provided path collection."""
 
@@ -19,6 +26,13 @@ def iter_python_files(paths: Iterable[Path | str]) -> Iterator[Path]:
         elif candidate.suffix == ".py":
             yield candidate
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.681446+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def _comment_block(lines: list[str], start_line: int) -> CommentBlock | None:
     block: list[str] = []
@@ -41,33 +55,75 @@ def _comment_block(lines: list[str], start_line: int) -> CommentBlock | None:
     return CommentBlock(start_line=start_idx + 1, end_line=start_line - 1, lines=block)
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.681446+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 class _ArtifactVisitor(ast.NodeVisitor):
     """Collect function and class definitions along with metadata."""
 
+    # @ai_composed: gpt-5
+    # @human_certified: pending
+    # scrutiny: auto
+    # date: 2025-11-08T00:34:45.681446+00:00
+    # notes: bulk annotation
+    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    
     def __init__(self, path: Path, lines: list[str]) -> None:
         self._path = path
         self._lines = lines
         self._qualname_parts: list[str] = []
         self.artifacts: list[CodeArtifact] = []
 
+    # @ai_composed: gpt-5
+    # @human_certified: pending
+    # scrutiny: auto
+    # date: 2025-11-08T00:34:45.681446+00:00
+    # notes: bulk annotation
+    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    
     def visit_ClassDef(self, node: ast.ClassDef) -> None:  # noqa: N802 - AST API
         self._visit_named_node(node, "class")
         self._qualname_parts.append(node.name)
         self.generic_visit(node)
         self._qualname_parts.pop()
 
+    # @ai_composed: gpt-5
+    # @human_certified: pending
+    # scrutiny: auto
+    # date: 2025-11-08T00:34:45.681446+00:00
+    # notes: bulk annotation
+    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
         self._visit_named_node(node, "function")
         self._qualname_parts.append(node.name)
         self.generic_visit(node)
         self._qualname_parts.pop()
 
+    # @ai_composed: gpt-5
+    # @human_certified: pending
+    # scrutiny: auto
+    # date: 2025-11-08T00:34:45.681446+00:00
+    # notes: bulk annotation
+    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:  # noqa: N802
         self._visit_named_node(node, "async_function")
         self._qualname_parts.append(node.name)
         self.generic_visit(node)
         self._qualname_parts.pop()
 
+    # @ai_composed: gpt-5
+    # @human_certified: pending
+    # scrutiny: auto
+    # date: 2025-11-08T00:34:45.681446+00:00
+    # notes: bulk annotation
+    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    
     def _visit_named_node(self, node: ast.AST, artifact_type: str) -> None:
         name = getattr(node, "name", "<anonymous>")
         qualname = ".".join([*self._qualname_parts, name])
@@ -89,6 +145,13 @@ class _ArtifactVisitor(ast.NodeVisitor):
         )
         self.artifacts.append(artifact)
 
+    # @ai_composed: gpt-5
+    # @human_certified: pending
+    # scrutiny: auto
+    # date: 2025-11-08T00:34:45.681446+00:00
+    # notes: bulk annotation
+    # history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+    
     @staticmethod
     def _artifact_start_line(node: ast.AST) -> int:
         decorators = getattr(node, "decorator_list", [])
@@ -97,12 +160,26 @@ class _ArtifactVisitor(ast.NodeVisitor):
         return getattr(node, "lineno", 1)
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.681446+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def _indent_for_line(lines: list[str], line_number: int) -> str:
     if 1 <= line_number <= len(lines):
         line = lines[line_number - 1]
         return line[: len(line) - len(line.lstrip(" \t"))]
     return ""
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.681446+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.681446+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def parse_file(path: Path) -> Sequence[CodeArtifact]:
     """Parse a Python file and extract provenance metadata."""

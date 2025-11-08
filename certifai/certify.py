@@ -13,6 +13,13 @@ from .utils.logging import get_logger
 LOGGER = get_logger("certify")
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.964853+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.964853+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def certify(
     paths: Iterable[Path | str],
     reviewer: str,
@@ -50,6 +57,13 @@ def certify(
     return updated_artifacts
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.964853+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.964853+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def verify_all(
     reviewer: str,
     *,
@@ -64,6 +78,13 @@ def verify_all(
         level = ScrutinyLevel.HIGH
     return certify(target_paths, reviewer, level.value, include_existing=False)
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.964853+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.964853+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def _rewrite_metadata(
     path: Path,

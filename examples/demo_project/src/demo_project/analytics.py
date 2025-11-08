@@ -38,6 +38,13 @@ def compute_macro_f1(scores: Iterable[tuple[float, float]]) -> float:
     return mean(f1_values) if f1_values else 0.0
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.158086+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.158086+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def summarize_predictions(predictions: Iterable[float]) -> dict[str, float]:
     """Return simple summary metrics for model predictions.
 

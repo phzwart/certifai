@@ -6,6 +6,13 @@ from certifai.models import ScrutinyLevel
 from certifai.parser import parse_file
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.176255+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.176255+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def test_parse_file_extracts_metadata(tmp_path: Path) -> None:
     source = """
 # helper comment

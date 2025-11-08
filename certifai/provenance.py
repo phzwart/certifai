@@ -16,6 +16,13 @@ from .utils.logging import get_logger
 LOGGER = get_logger("provenance")
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.918067+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @dataclass(slots=True)
 class ProvenanceResult:
     """Result of running provenance annotation on a set of files."""
@@ -24,6 +31,13 @@ class ProvenanceResult:
     updated_files: list[Path]
     policy_violations: list[str]
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.918067+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def annotate_paths(
     paths: Iterable[Path | str],
@@ -67,6 +81,13 @@ def annotate_paths(
     )
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.918067+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> list[str]:
     """Return a list of policy violations detected for the given artifacts."""
 
@@ -95,6 +116,13 @@ def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> l
                 )
     return violations
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.918067+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.918067+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def _insert_metadata_blocks(
     path: Path,

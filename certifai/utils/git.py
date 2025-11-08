@@ -10,6 +10,13 @@ from git import Repo
 from git.exc import InvalidGitRepositoryError
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.129767+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.129767+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @lru_cache(maxsize=1)
 def get_repo(start_path: Path | None = None) -> Optional[Repo]:
     """Return a GitPython Repo rooted at or above the provided path."""
@@ -20,6 +27,13 @@ def get_repo(start_path: Path | None = None) -> Optional[Repo]:
     except InvalidGitRepositoryError:
         return None
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:46.129767+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:46.129767+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def describe_line(path: Path, lineno: int) -> dict[str, str] | None:
     """Return commit metadata for a specific line within a file."""

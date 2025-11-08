@@ -26,10 +26,24 @@ from .utils.logging import get_logger
 LOGGER = get_logger("cli")
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def _configure_logging(verbose: bool) -> None:
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level, format="[%(levelname)s] %(message)s")
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 @click.group()
 @click.option("--verbose", is_flag=True, help="Enable verbose logging output.")
@@ -39,6 +53,13 @@ def cli(verbose: bool) -> None:
 
     _configure_logging(verbose)
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -60,6 +81,13 @@ def annotate(paths: tuple[Path, ...], ai_agent: str, notes: str, policy: Path | 
         raise SystemExit(1)
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 @click.option("--reviewer", required=True, help="Reviewer identifier for certification.")
@@ -74,10 +102,24 @@ def certify(paths: tuple[Path, ...], reviewer: str, scrutiny: str, notes: str | 
     click.echo(f"Certified {len(updated)} artifact(s).")
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @cli.group()
 def verify() -> None:
     """Verification commands."""
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 @verify.command("all")
 @click.option("--reviewer", required=True, help="Reviewer identifier for verification.")
@@ -88,6 +130,13 @@ def verify_all(reviewer: str, scrutiny: str | None) -> None:
     updated = verify_artifacts(reviewer, scrutiny=scrutiny)
     click.echo(f"Verified {len(updated)} artifact(s).")
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -113,6 +162,13 @@ def report(paths: tuple[Path, ...], output_format: str) -> None:
         click.echo(emit_text_report(summary))
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 def badge(paths: tuple[Path, ...]) -> None:
@@ -130,10 +186,24 @@ def badge(paths: tuple[Path, ...]) -> None:
     click.echo(f"![certifai Coverage]({badge_url})")
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @cli.group()
 def config() -> None:
     """Configuration helpers."""
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 @config.command("show")
 @click.option("--path", type=click.Path(path_type=Path), help="Optional path to a policy file.")
@@ -149,6 +219,13 @@ def config_show(path: Path | None) -> None:
         "reviewers": list(policy.reviewers),
     }, indent=2))
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.799864+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.799864+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def main(argv: Optional[list[str]] = None) -> int:
     """Entry point used by console script entry point."""

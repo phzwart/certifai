@@ -13,6 +13,13 @@ from .utils.logging import get_logger
 LOGGER = get_logger("hooks")
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.475775+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.475775+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def run_pre_commit(
     paths: Iterable[str],
     *,
@@ -33,6 +40,13 @@ def run_pre_commit(
     return 0
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.475775+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.475775+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="certifai pre-commit hook")
     parser.add_argument("paths", nargs="*", help="Files to inspect")
@@ -49,6 +63,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     return parser.parse_args(argv)
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.475775+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.475775+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)

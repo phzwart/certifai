@@ -9,6 +9,13 @@ from typing import Any, Sequence
 import yaml
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.623785+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.623785+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 @dataclass(slots=True)
 class EnforcementSettings:
     """Configuration flags controlling code certification policies."""
@@ -16,6 +23,13 @@ class EnforcementSettings:
     ai_composed_requires_high_scrutiny: bool = True
     min_coverage: float | None = None
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.623785+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.623785+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class PolicyConfig:
@@ -30,6 +44,13 @@ DEFAULT_POLICY = PolicyConfig(
     reviewers=(),
 )
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.623785+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.623785+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def load_policy(path: Path | None = None) -> PolicyConfig:
     """Load the certifai policy configuration from disk."""
@@ -46,6 +67,13 @@ def load_policy(path: Path | None = None) -> PolicyConfig:
     return PolicyConfig(enforcement=enforcement, reviewers=reviewers)
 
 
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.623785+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.623785+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
+
 def _resolve_config_path(path: Path | None) -> Path | None:
     if path is not None:
         return path
@@ -58,6 +86,13 @@ def _resolve_config_path(path: Path | None) -> Path | None:
             return candidate
     return None
 
+
+# @ai_composed: gpt-5
+# @human_certified: pending
+# scrutiny: auto
+# date: 2025-11-08T00:34:45.623785+00:00
+# notes: bulk annotation
+# history: 2025-11-08T00:34:45.623785+00:00 inserted by certifai; last_commit=f07d0d9 by phzwart
 
 def _parse_enforcement(data: Any) -> EnforcementSettings:
     if not isinstance(data, dict):
