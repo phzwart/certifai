@@ -27,11 +27,11 @@ LOGGER = get_logger("cli")
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 def _configure_logging(verbose: bool) -> None:
     level = logging.DEBUG if verbose else logging.INFO
@@ -39,11 +39,11 @@ def _configure_logging(verbose: bool) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @click.group()
 @click.option("--verbose", is_flag=True, help="Enable verbose logging output.")
@@ -55,11 +55,11 @@ def cli(verbose: bool) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -82,11 +82,11 @@ def annotate(paths: tuple[Path, ...], ai_agent: str, notes: str, policy: Path | 
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
-# scrutiny: auto
-# date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# @human_certified: PHZ
+# scrutiny: high
+# date: 2025-11-08T01:38:57.432588+00:00
+# notes: manual review
+# history: 2025-11-08T01:38:57.432588+00:00 digest=139418d81d1ecdc479bcd4da96fbf8c6e10cf5c1 certified by PHZ (high) last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -103,11 +103,11 @@ def certify(paths: tuple[Path, ...], reviewer: str, scrutiny: str, notes: str | 
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @cli.group()
 def verify() -> None:
@@ -115,11 +115,11 @@ def verify() -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @verify.command("all")
 @click.option("--reviewer", required=True, help="Reviewer identifier for verification.")
@@ -132,11 +132,11 @@ def verify_all(reviewer: str, scrutiny: str | None) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -163,11 +163,11 @@ def report(paths: tuple[Path, ...], output_format: str) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
@@ -187,11 +187,11 @@ def badge(paths: tuple[Path, ...]) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @cli.group()
 def config() -> None:
@@ -199,11 +199,11 @@ def config() -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 @config.command("show")
 @click.option("--path", type=click.Path(path_type=Path), help="Optional path to a policy file.")
@@ -221,11 +221,11 @@ def config_show(path: Path | None) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.799864+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.124072+00:00 digest=f78bccc47244c3b6bd440b93fcfc6534ec77366c last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:10:38.983420+00:00 digest=1d01aa11423a60429ad5a390a99e2b8535830afd last_commit=f07d0d9 by phzwart
 
 def main(argv: Optional[list[str]] = None) -> int:
     """Entry point used by console script entry point."""

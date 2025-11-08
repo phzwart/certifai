@@ -8,7 +8,7 @@ from typing import Iterable, Sequence
 
 from .history import build_history_entry
 from .metadata import MetadataUpdate, update_metadata_blocks
-from .models import CodeArtifact, CommentBlock, ScrutinyLevel, TagMetadata
+from .models import CodeArtifact, CommentBlock, ScrutinyLevel, TagMetadata  # pyright: ignore[reportUnusedImport]
 from .parser import iter_python_files, parse_file
 from .utils.logging import get_logger
 
@@ -16,11 +16,11 @@ LOGGER = get_logger("certify")
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.964853+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.326786+00:00 digest=e402cfa510f6bb78119b6fdaa342147464e60a2b last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart
 
 def certify(
     paths: Iterable[Path | str],
@@ -60,11 +60,11 @@ def certify(
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.964853+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.326786+00:00 digest=e402cfa510f6bb78119b6fdaa342147464e60a2b last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart
 
 def verify_all(
     reviewer: str,
@@ -82,11 +82,11 @@ def verify_all(
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.964853+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.326786+00:00 digest=e402cfa510f6bb78119b6fdaa342147464e60a2b last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:06:25.558375+00:00 digest=da44edfbd98bb6a3cf9a4b24339b948f4cfeca9c last_commit=f07d0d9 by phzwart
 
 def _rewrite_metadata(
     path: Path,

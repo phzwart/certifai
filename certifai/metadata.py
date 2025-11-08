@@ -12,11 +12,11 @@ MetadataUpdate = Tuple[CodeArtifact, TagMetadata]
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:54:53.797040+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:53.797040+00:00 digest=4ea0e501803e22523823c1cd7f86b56aa0925017 annotated last_commit=unknown
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.109022+00:00 digest=32308dcb6c7133adac6a4b400ee1a4fdea89a731 last_commit=97cec9a by phzwart
 
 def update_metadata_blocks(path: Path, updates: Sequence[MetadataUpdate]) -> bool:
     """Apply updated metadata blocks for the provided artifacts.

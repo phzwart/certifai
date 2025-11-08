@@ -6,11 +6,11 @@ from certifai.policy import EnforcementSettings, PolicyConfig, load_policy
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.249248+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.811768+00:00 digest=387cee212e9f3bda8c83e1cf263fb02d46754f64 last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:35:22.538630+00:00 digest=479c655323df41ec33e2891fdf5b16a2d7e2b86c last_commit=f07d0d9 by phzwart
 
 def test_load_policy_defaults_when_missing(tmp_path: Path) -> None:
     policy = load_policy(tmp_path / ".certifai.yml")
@@ -20,11 +20,11 @@ def test_load_policy_defaults_when_missing(tmp_path: Path) -> None:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.249248+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.811768+00:00 digest=387cee212e9f3bda8c83e1cf263fb02d46754f64 last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:35:22.538630+00:00 digest=479c655323df41ec33e2891fdf5b16a2d7e2b86c last_commit=f07d0d9 by phzwart
 
 def test_load_policy_from_file(tmp_path: Path) -> None:
     config = tmp_path / ".certifai.yml"

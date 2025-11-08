@@ -89,6 +89,7 @@ Prints the effective policy in JSON format, combining defaults and values resolv
   enforcement:
     ai_composed_requires_high_scrutiny: true
     min_coverage: 0.8
+    ignore_unannotated: false  # set true to skip coverage checks for files without metadata
   reviewers:
     - PZ
     - JD

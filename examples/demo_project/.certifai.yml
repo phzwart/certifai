@@ -1,6 +1,7 @@
 enforcement:
   ai_composed_requires_high_scrutiny: true
   min_coverage: 0.8
+  ignore_unannotated: false
 reviewers:
   - Mentor
   - Reviewer2

@@ -14,11 +14,11 @@ _DIGEST_PATTERN = re.compile(r"digest=([0-9a-f]{40})")
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:54:54.476559+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.476559+00:00 digest=61ad5d86a634101372c40df6dda7529cf3d4b5d8 annotated last_commit=unknown
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart
 
 def compute_digest(metadata: TagMetadata) -> str:
     """Return a stable digest representing the metadata content."""
@@ -36,11 +36,11 @@ def compute_digest(metadata: TagMetadata) -> str:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:54:54.476559+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.476559+00:00 digest=61ad5d86a634101372c40df6dda7529cf3d4b5d8 annotated last_commit=unknown
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart
 
 def extract_digest(entry: str | None) -> Optional[str]:
     """Extract the stored digest from a history entry if present."""
@@ -54,11 +54,11 @@ def extract_digest(entry: str | None) -> Optional[str]:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:54:54.476559+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.476559+00:00 digest=61ad5d86a634101372c40df6dda7529cf3d4b5d8 annotated last_commit=unknown
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.032195+00:00 digest=9e5b7138788bb22a4cdc4ebbce221f1b187665f2 last_commit=97cec9a by phzwart
 
 def build_history_entry(
     artifact: CodeArtifact,

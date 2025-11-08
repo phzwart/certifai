@@ -12,11 +12,11 @@ from .parser import iter_python_files, parse_file
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class CoverageSummary:
@@ -30,11 +30,11 @@ class CoverageSummary:
     scrutiny_counts: Mapping[str, int]
 
     # @ai_composed: gpt-5
-    # @human_certified: pending
+    # @human_certified: PHZ
     # scrutiny: auto
     # date: 2025-11-08T00:34:46.021164+00:00
-    # notes: bulk annotation
-    # history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+    # notes: No obvious issues found.
+    # history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
     
     @property
     def coverage_ratio(self) -> float:
@@ -45,11 +45,11 @@ class CoverageSummary:
         return self.human_certified / self.total_functions
 
     # @ai_composed: gpt-5
-    # @human_certified: pending
+    # @human_certified: PHZ
     # scrutiny: auto
     # date: 2025-11-08T00:34:46.021164+00:00
-    # notes: bulk annotation
-    # history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+    # notes: No obvious issues found.
+    # history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
     
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serialisable representation of the summary."""
@@ -65,43 +65,49 @@ class CoverageSummary:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
 
 def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
     """Inspect project sources and build a coverage summary."""
 
-    artifacts: list[CodeArtifact] = []
+    all_artifacts: list[CodeArtifact] = []
     for path in iter_python_files(paths):
-        artifacts.extend(parse_file(path))
+        all_artifacts.extend(parse_file(path))
 
-    total = len(artifacts)
+    function_artifacts = [
+        artifact
+        for artifact in all_artifacts
+        if artifact.artifact_type in {"function", "async_function"}
+    ]
+
+    total = len(function_artifacts)
     ai_composed = sum(
         1
-        for artifact in artifacts
+        for artifact in function_artifacts
         if artifact.tags.ai_composed and artifact.tags.ai_composed.lower() != "pending"
     )
     human_certified = sum(
         1
-        for artifact in artifacts
+        for artifact in function_artifacts
         if not artifact.tags.is_pending_certification
         and artifact.tags.human_certified
         and artifact.tags.human_certified.lower() != "pending"
     )
     pending_review = sum(
-        1 for artifact in artifacts if artifact.tags.is_pending_certification
+        1 for artifact in function_artifacts if artifact.tags.is_pending_certification
     )
     scrutiny_counter: Counter[str] = Counter()
-    for artifact in artifacts:
+    for artifact in function_artifacts:
         level = artifact.tags.scrutiny or ScrutinyLevel.AUTO
         value = level.value if isinstance(level, ScrutinyLevel) else str(level)
         scrutiny_counter[value] += 1
 
     return CoverageSummary(
-        artifacts=artifacts,
+        artifacts=function_artifacts,
         total_functions=total,
         ai_composed=ai_composed,
         human_certified=human_certified,
@@ -111,11 +117,11 @@ def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
 
 def emit_text_report(summary: CoverageSummary) -> str:
     """Render a human-readable report for console output."""
@@ -136,11 +142,11 @@ def emit_text_report(summary: CoverageSummary) -> str:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
 
 def emit_csv_report(summary: CoverageSummary) -> str:
     """Return a CSV representation of the coverage metrics."""
@@ -164,11 +170,11 @@ def emit_csv_report(summary: CoverageSummary) -> str:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
 
 def emit_markdown_table(summary: CoverageSummary) -> str:
     """Return a markdown table summarising coverage metrics."""
@@ -185,11 +191,11 @@ def emit_markdown_table(summary: CoverageSummary) -> str:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:46.021164+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.386718+00:00 digest=9672b7ccb6fdc538183b7ae9dc19031575a2b0bc last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.033040+00:00 digest=1c7f183374fb0c2b076a530fd9c040c5ab5703f5 last_commit=f07d0d9 by phzwart
 
 def github_actions_step() -> str:
     """Return a reusable GitHub Actions snippet for running certifai."""

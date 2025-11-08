@@ -14,11 +14,11 @@ LOGGER = get_logger("hooks")
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.475775+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:28.719649+00:00 digest=11391cb64b4371e1ad542ea38854dbfb1145d97a last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart
 
 def run_pre_commit(
     paths: Iterable[str],
@@ -41,11 +41,11 @@ def run_pre_commit(
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.475775+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:28.719649+00:00 digest=11391cb64b4371e1ad542ea38854dbfb1145d97a last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="certifai pre-commit hook")
@@ -65,11 +65,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.475775+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:28.719649+00:00 digest=11391cb64b4371e1ad542ea38854dbfb1145d97a last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.151522+00:00 digest=ca0efa2f9a9902b74c92476000092f6bafd24156 last_commit=f07d0d9 by phzwart
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)

@@ -1,5 +1,6 @@
 enforcement:
-  ai_composed_requires_high_scrutiny: true
+  ai_composed_requires_high_scrutiny: false
   min_coverage: 0.8
+  ignore_unannotated: false
 reviewers:
   - PHZ

@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: certifai
+        name: certifai provenance annotator
+        entry: certifai-pre-commit
+        language: system
+        pass_filenames: true
+        types: [python]

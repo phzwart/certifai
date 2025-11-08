@@ -7,11 +7,11 @@ from certifai.parser import parse_file
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
-# scrutiny: auto
-# date: 2025-11-08T00:34:46.176255+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.697679+00:00 digest=60b8325af52add64c622ad5447e806634da37673 last_commit=f07d0d9 by phzwart
+# @human_certified: PHZ
+# scrutiny: high
+# date: 2025-11-08T01:38:57.455828+00:00
+# notes: manual review
+# history: 2025-11-08T01:38:57.455828+00:00 digest=485f26e46ca6174af30e3707cdacc236ce9239f8 certified by PHZ (high) last_commit=f07d0d9 by phzwart
 
 def test_parse_file_extracts_metadata(tmp_path: Path) -> None:
     source = """

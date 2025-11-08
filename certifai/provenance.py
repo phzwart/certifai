@@ -18,11 +18,11 @@ LOGGER = get_logger("provenance")
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart
 
 @dataclass(slots=True)
 class ProvenanceResult:
@@ -34,11 +34,11 @@ class ProvenanceResult:
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart
 
 def annotate_paths(
     paths: Iterable[Path | str],
@@ -53,12 +53,15 @@ def annotate_paths(
     resolved_paths = list(iter_python_files(paths))
     collected_artifacts: list[CodeArtifact] = []
     updated_paths: set[Path] = set()
+    active_policy = policy or DEFAULT_POLICY
 
     for path in resolved_paths:
         artifacts = list(parse_file(path))
-        needs_update = [artifact for artifact in artifacts if not artifact.tags.has_metadata]
         file_changed = False
 
+        needs_update: Sequence[CodeArtifact] = ()
+        if not active_policy.enforcement.ignore_unannotated:
+            needs_update = [artifact for artifact in artifacts if not artifact.tags.has_metadata]
         if needs_update:
             LOGGER.debug("Annotating %s with %d metadata blocks", path, len(needs_update))
             if _insert_metadata_blocks(
@@ -78,7 +81,6 @@ def annotate_paths(
         if file_changed:
             updated_paths.add(path)
 
-    active_policy = policy or DEFAULT_POLICY
     violations = enforce_policy(collected_artifacts, active_policy)
 
     return ProvenanceResult(
@@ -89,11 +91,11 @@ def annotate_paths(
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.035474+00:00 digest=0a2c121eff2c7e10e998652feff8c5c433148750 last_commit=f07d0d9 by phzwart
 
 def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> list[str]:
     """Return a list of policy violations detected for the given artifacts."""
@@ -108,28 +110,36 @@ def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> l
                     f"{artifact.filepath}:{artifact.lineno} requires high scrutiny for ai_composed artifacts"
                 )
     if policy.enforcement.min_coverage is not None:
-        total = len(artifacts)
+        function_artifacts = [
+            artifact
+            for artifact in artifacts
+            if artifact.artifact_type in {"function", "async_function"}
+            and (artifact.tags.has_metadata or not policy.enforcement.ignore_unannotated)
+        ]
+        total = len(function_artifacts)
         if total:
             certified = sum(
                 1
-                for artifact in artifacts
+                for artifact in function_artifacts
                 if artifact.tags.human_certified
                 and artifact.tags.human_certified.lower() != "pending"
             )
             coverage = certified / total
             if coverage < policy.enforcement.min_coverage:
                 violations.append(
-                    f"Coverage {coverage:.2%} below required {policy.enforcement.min_coverage:.0%}"
+                    "Coverage "
+                    f"{certified}/{total} ({coverage:.2%}) below required "
+                    f"{policy.enforcement.min_coverage:.0%}"
                 )
     return violations
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:34:45.918067+00:00
 # notes: bulk annotation
-# history: 2025-11-08T00:54:54.276596+00:00 digest=ad25a9fbc9e8fef45e0df3e7c9f4fc1cbbf9f5a8 last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T01:22:48.035474+00:00 digest=aff21f4e5f07604c1d3c2dfdc5c8260d91621e0a last_commit=f07d0d9 by phzwart
 
 def _insert_metadata_blocks(
     path: Path,
@@ -181,11 +191,11 @@ def _insert_metadata_blocks(
 
 
 # @ai_composed: gpt-5
-# @human_certified: pending
+# @human_certified: PHZ
 # scrutiny: auto
 # date: 2025-11-08T00:54:54.247217+00:00
-# notes: bulk annotation
-# history: 2025-11-08T00:54:54.247217+00:00 digest=39ce520a0b7bafe0ce44844476d4b4cf86f29900 annotated last_commit=uncommitted
+# notes: No obvious issues found.
+# history: 2025-11-08T01:22:48.035474+00:00 digest=0002e726fdd176050dec9ac0e6cdf3cd90c641f9 last_commit=97cec9a by phzwart
 
 def _refresh_history_blocks(
     path: Path,

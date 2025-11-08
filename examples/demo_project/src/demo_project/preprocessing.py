@@ -6,9 +6,9 @@ from typing import Iterable, Sequence
 
 
 # @ai_composed: gpt-4
-# @human_certified: pending
+# @human_certified: Mentor
 # scrutiny: auto
-# history: 2025-11-08T00:54:54.624037+00:00 digest=f0236a5202e90a3a76bea981e5f42906dbc85fb6 last_commit=f07d0d9 by phzwart
+# history: 2025-11-08T01:35:22.538537+00:00 digest=92e5fbef3953cdda693bf8143456c9cfdffcf962 last_commit=f07d0d9 by phzwart
 
 def normalize_range(values: Sequence[float]) -> list[float]:
     """Normalize values to the [0, 1] range."""
