@@ -13,8 +13,20 @@ import click
 from . import __version__
 from .decorators import certifai
 from .certify import certify as certify_artifacts
+from .certify import certify_agent as certify_artifacts_agent
 from .certify import verify_all as verify_artifacts
 from .finalize import finalize as finalize_artifacts
+from .integrations.github import build_pr_status
+from .integrations.security import run_all_scanners
+from .publishing import publish_report
+from .audit import (
+    record_certification,
+    record_agent_certification,
+    record_finalization,
+    record_enforcement,
+    read_audit_log,
+)
+from .enforce import enforce_ci
 from .policy import load_policy
 from .provenance import annotate_paths
 from .report import (
@@ -24,6 +36,7 @@ from .report import (
     emit_text_report,
 )
 from .utils.logging import get_logger
+from .models import ScrutinyLevel
 
 LOGGER = get_logger("cli")
 
@@ -104,27 +117,118 @@ def annotate(paths: tuple[Path, ...], ai_agent: str, notes: str, policy: Path | 
 )
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
-@click.option("--reviewer", required=True, help="Reviewer identifier for certification.")
+@click.option("--reviewer", required=True, help="Reviewer identifier (human or agent).")
 @click.option("--scrutiny", required=True, help="Target scrutiny level (auto|low|medium|high).")
 @click.option("--notes", help="Optional notes appended to metadata.")
 @click.option("--include-existing", is_flag=True, help="Also refresh artifacts that are already certified.")
-def certify(paths: tuple[Path, ...], reviewer: str, scrutiny: str, notes: str | None, include_existing: bool) -> None:
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
+@click.option("--agent", is_flag=True, help="Treat the reviewer as a configured review agent." )
+def certify(paths: tuple[Path, ...], reviewer: str, scrutiny: str, notes: str | None, include_existing: bool, policy: Path | None, agent: bool) -> None:
     """Certify selected artifacts."""
 
     target_paths = paths or (Path.cwd(),)
-    updated = certify_artifacts(target_paths, reviewer, scrutiny, notes=notes, include_existing=include_existing)
+    policy_config = load_policy(policy)
+    reviewer_kind = "agent" if agent else "human"
+
+    requested_level = ScrutinyLevel.from_string(scrutiny)
+    if requested_level is None:
+        raise click.ClickException(f"Unsupported scrutiny level: {scrutiny}")
+
+    if reviewer_kind == "agent":
+        agent_settings = policy_config.integrations.agents
+        if not agent_settings.enabled:
+            raise click.ClickException("Agent-based certification is disabled in the current policy.")
+        permission = next((item for item in agent_settings.reviewers if item.id == reviewer), None)
+        if permission is None:
+            raise click.ClickException(f"Agent '{reviewer}' is not registered in policy integrations.agents.reviewers.")
+        if permission.max_scrutiny:
+            allowed_level = ScrutinyLevel.from_string(permission.max_scrutiny)
+            if allowed_level is None:
+                raise click.ClickException(f"Invalid max_scrutiny '{permission.max_scrutiny}' configured for agent {reviewer}.")
+            order = {ScrutinyLevel.AUTO: 0, ScrutinyLevel.LOW: 1, ScrutinyLevel.MEDIUM: 2, ScrutinyLevel.HIGH: 3}
+            if order[requested_level] > order[allowed_level]:
+                raise click.ClickException(
+                    f"Agent '{reviewer}' may not certify '{scrutiny}' scrutiny (max allowed: {permission.max_scrutiny})."
+                )
+
+    updated = certify_artifacts(
+        target_paths,
+        reviewer,
+        scrutiny,
+        notes=notes,
+        include_existing=include_existing,
+        reviewer_kind=reviewer_kind,
+    )
     click.echo(f"Certified {len(updated)} artifact(s).")
+    record_certification(policy_config.integrations.audit, updated, reviewer, notes, reviewer_kind=reviewer_kind)
+
+
+@cli.command("certify-agent")
+@click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
+@click.option("--agent", "agent_id", required=True, help="Agent identifier for certification.")
+@click.option("--scrutiny", required=True, help="Target scrutiny level (auto|low|medium|high).")
+@click.option("--notes", help="Optional notes appended to metadata.")
+@click.option("--include-existing", is_flag=True, help="Also refresh artifacts that are already certified.")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
+def certify_agent_cmd(paths: tuple[Path, ...], agent_id: str, scrutiny: str, notes: str | None, include_existing: bool, policy: Path | None) -> None:
+    """Certify selected artifacts using a trusted agent."""
+
+    target_paths = paths or (Path.cwd(),)
+    policy_config = load_policy(policy)
+    if not policy_config.integrations.agents.enabled:
+        raise SystemExit("Agent certification is not enabled in the current policy.")
+    allowed_agents = {perm.id: perm for perm in policy_config.integrations.agents.reviewers}
+    if agent_id not in allowed_agents:
+        raise SystemExit(f"Agent {agent_id} is not permitted by policy.")
+    max_scrutiny = allowed_agents[agent_id].max_scrutiny
+    if max_scrutiny:
+        level = ScrutinyLevel.from_string(scrutiny)
+        max_level = ScrutinyLevel.from_string(max_scrutiny)
+        if level is None or max_level is None:
+            raise SystemExit("Invalid scrutiny level in agent policy configuration.")
+        order = [ScrutinyLevel.AUTO, ScrutinyLevel.LOW, ScrutinyLevel.MEDIUM, ScrutinyLevel.HIGH]
+        if order.index(level) > order.index(max_level):
+            raise SystemExit(f"Agent {agent_id} is not allowed to certify at {scrutiny} scrutiny (max {max_scrutiny}).")
+
+    updated = certify_artifacts_agent(target_paths, agent_id, scrutiny, notes=notes, include_existing=include_existing)
+    click.echo(f"Agent {agent_id} certified {len(updated)} artifact(s).")
+    record_certification(policy_config.integrations.audit, updated, agent_id, notes)
+
+
+@cli.group()
+def agent() -> None:
+    """Agent review helpers."""
+
+
+@agent.command("certify")
+@click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
+@click.option("--agent-id", required=True, help="Identifier for the review agent.")
+@click.option("--scrutiny", required=True, help="Scrutiny level applied by the agent (auto|low|medium|high).")
+@click.option("--notes", help="Optional notes recorded for this agent review.")
+@click.option("--include-existing", is_flag=True, help="Also update artifacts already reviewed by this agent.")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
+def agent_certify(paths: tuple[Path, ...], agent_id: str, scrutiny: str, notes: str | None, include_existing: bool, policy: Path | None) -> None:
+    """Record agent certification for selected artifacts."""
+
+    target_paths = paths or (Path.cwd(),)
+    policy_config = load_policy(policy)
+    updated = certify_agent_artifacts(target_paths, agent_id, scrutiny, notes=notes, include_existing=include_existing)
+    click.echo(f"Agent {agent_id} certified {len(updated)} artifact(s).")
+    record_agent_certification(policy_config.integrations.audit, updated, agent_id, notes)
 
 
 @cli.command()
 @click.argument("paths", nargs=-1, type=click.Path(path_type=Path))
 @click.option("--registry-root", type=click.Path(path_type=Path), help="Optional base path for the registry manifest.")
-def finalize(paths: tuple[Path, ...], registry_root: Path | None) -> None:
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
+def finalize(paths: tuple[Path, ...], registry_root: Path | None, policy: Path | None) -> None:
     """Finalize certified artifacts and move provenance to the registry."""
 
     target_paths = paths or (Path.cwd(),)
+    policy_config = load_policy(policy)
     finalized = finalize_artifacts(target_paths, registry_root=registry_root)
     click.echo(f"Finalized {len(finalized)} artifact(s).")
+    record_finalization(policy_config.integrations.audit, finalized)
 
 
 @certifai(
@@ -221,6 +325,153 @@ def badge(paths: tuple[Path, ...]) -> None:
         f"Human_Certified-{coverage_str}%25-{color}"
     )
     click.echo(f"![certifai Coverage]({badge_url})")
+
+
+@cli.group()
+def pr() -> None:
+    """Pull request integrations and helpers."""
+
+
+@pr.command("status")
+@click.option("--path", "paths", multiple=True, type=click.Path(path_type=Path), help="File or directory to analyse (repeatable). Defaults to repository root.")
+@click.option("--paths-file", type=click.Path(path_type=Path), help="File containing newline-delimited paths to include. Use '-' to read from stdin.")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to policy file.")
+@click.option("--output", type=click.Choice(["json", "pretty"]), default="json", show_default=True, help="Output format.")
+def pr_status(paths: tuple[Path, ...], paths_file: Path | None, policy: Path | None, output: str) -> None:
+    """Emit a JSON status summary for pull request automation."""
+
+    aggregated_paths: list[Path | str] = list(paths)
+
+    if paths_file is not None:
+        if str(paths_file) == "-":
+            content = sys.stdin.read().splitlines()
+        else:
+            content = paths_file.read_text(encoding="utf-8").splitlines()
+        aggregated_paths.extend(line.strip() for line in content if line.strip())
+
+    if not aggregated_paths:
+        aggregated_paths = [Path.cwd()]
+
+    policy_config = load_policy(policy)
+    status_payload = build_pr_status(aggregated_paths, policy_config)
+
+    indent = 2 if output == "pretty" else None
+    click.echo(json.dumps(status_payload, indent=indent, sort_keys=output == "pretty"))
+
+
+@cli.group()
+def security() -> None:
+    """Security scanner integrations."""
+
+
+@security.command("run")
+@click.option("--path", "paths", multiple=True, type=click.Path(path_type=Path), help="File or directory to scan (repeatable).")
+@click.option("--paths-file", type=click.Path(path_type=Path), help="File containing newline-delimited paths to scan. Use '-' to read from stdin.")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to policy file.")
+@click.option("--output", type=click.Choice(["json", "pretty"]), default="json", show_default=True, help="Output format.")
+def security_run(paths: tuple[Path, ...], paths_file: Path | None, policy: Path | None, output: str) -> None:
+    """Run configured security scanners and emit a JSON summary."""
+
+    policy_config = load_policy(policy)
+    settings = policy_config.integrations.security
+    aggregated_paths: list[Path | str] = list(paths)
+
+    if paths_file is not None:
+        if str(paths_file) == "-":
+            content = sys.stdin.read().splitlines()
+        else:
+            content = paths_file.read_text(encoding="utf-8").splitlines()
+        aggregated_paths.extend(line.strip() for line in content if line.strip())
+
+    if not aggregated_paths:
+        aggregated_paths = [Path.cwd()]
+
+    results = run_all_scanners(settings, aggregated_paths)
+    payload = {
+        "scanners": [
+            {
+                "name": result.name,
+                "command": result.command,
+                "exit_code": result.exit_code,
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "findings": result.findings,
+            }
+            for result in results
+        ],
+        "status": "pass" if all(result.exit_code == 0 for result in results) else "fail",
+    }
+
+    indent = 2 if output == "pretty" else None
+    click.echo(json.dumps(payload, indent=indent, sort_keys=output == "pretty"))
+
+
+@cli.group()
+def publish() -> None:
+    """Report publishing commands."""
+
+
+@publish.command("report")
+@click.option("--path", "paths", multiple=True, type=click.Path(path_type=Path), help="File or directory to include in the report (repeatable). Defaults to repository root.")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to policy file.")
+@click.option("--output", type=click.Choice(["json", "pretty"]), default="json", show_default=True, help="Output format.")
+def publish_report_cmd(paths: tuple[Path, ...], policy: Path | None, output: str) -> None:
+    """Publish coverage reports to configured destinations."""
+
+    target_paths = list(paths) or [Path.cwd()]
+    policy_config = load_policy(policy)
+    results = publish_report([Path(p) for p in target_paths], policy_config)
+
+    payload = {
+        "status": "pass" if results else "noop",
+        "destinations": results,
+    }
+
+    indent = 2 if output == "pretty" else None
+    click.echo(json.dumps(payload, indent=indent, sort_keys=output == "pretty"))
+
+
+@cli.command()
+@click.option("--path", "paths", multiple=True, type=click.Path(path_type=Path), help="File or directory to evaluate (repeatable). Defaults to repository root.")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to policy file.")
+@click.option("--output", type=click.Choice(["json", "pretty"]), default="json", show_default=True, help="Output format.")
+def enforce(paths: tuple[Path, ...], policy: Path | None, output: str) -> None:
+    """Run CI enforcement checks (coverage, policy, security)."""
+
+    target_paths = list(paths) or [Path.cwd()]
+    policy_config = load_policy(policy)
+    result = enforce_ci([Path(p) for p in target_paths], policy_config)
+
+    indent = 2 if output == "pretty" else None
+    click.echo(json.dumps({
+        "status": result.status,
+        "messages": result.messages,
+        "payload": result.payload,
+    }, indent=indent, sort_keys=output == "pretty"))
+
+    record_enforcement(policy_config.integrations.audit, result.status, result.messages)
+    if result.status != "pass":
+        raise SystemExit(1)
+
+
+@cli.group()
+def audit() -> None:
+    """Audit log utilities."""
+
+
+@audit.command("show")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to policy file.")
+@click.option("--log-path", type=click.Path(path_type=Path), help="Override audit log path.")
+@click.option("--limit", type=int, default=-1, show_default=True, help="Number of most recent entries to display (-1 for all).")
+@click.option("--output", type=click.Choice(["json", "pretty"]), default="json", show_default=True, help="Output format.")
+def audit_show(policy: Path | None, log_path: Path | None, limit: int, output: str) -> None:
+    """Show audit log entries."""
+
+    policy_config = load_policy(policy)
+    effective_limit = None if limit < 0 else limit
+    entries = read_audit_log(policy_config.integrations.audit, limit=effective_limit, override=log_path)
+    indent = 2 if output == "pretty" else None
+    click.echo(json.dumps(entries, indent=indent, sort_keys=output == "pretty"))
 
 
 @certifai(

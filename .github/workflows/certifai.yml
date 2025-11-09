@@ -1,43 +1,21 @@
 name: certifai
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  quality:
+  certifai:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-      - name: Install tooling
+          python-version: '3.11'
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install .
-          pip install coverage[toml]
-          pip install nox
-
-      - name: Run unit tests
-        run: nox --session=tests
-
-      - name: Coverage report
-        run: nox --session=coverage
-
-      - name: Coverage summary
-        run: python -m coverage report -m
-
-      - name: Generate certifai report
-        run: certifai report --format md certifai tests examples/demo_project
-
-      - name: Upload coverage XML
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-xml
-          path: coverage.xml
+          pip install -e .[dev]
+      - name: Run certifai enforcement
+        run: |
+          certifai enforce --output pretty

@@ -5,7 +5,7 @@ from pathlib import Path
 from certifai.decorators import certifai
 from certifai.history import compute_digest, extract_digest
 from certifai.models import ScrutinyLevel
-from certifai.policy import EnforcementSettings, PolicyConfig
+from certifai.policy import EnforcementSettings, PolicyConfig, IntegrationsConfig
 from certifai.provenance import annotate_paths, enforce_policy
 from certifai.parser import parse_file
 
@@ -113,6 +113,7 @@ def risky():
     policy = PolicyConfig(
         enforcement=EnforcementSettings(ai_composed_requires_high_scrutiny=True),
         reviewers=("Reviewer",),
+        integrations=IntegrationsConfig(),
     )
     violations = enforce_policy(artifacts, policy)
     assert violations, "Expected policy violations for missing high scrutiny"
@@ -150,6 +151,7 @@ class Sample:
             min_coverage=0.5,
         ),
         reviewers=(),
+        integrations=IntegrationsConfig(),
     )
     violations = enforce_policy(artifacts, policy)
     assert not violations
@@ -187,6 +189,7 @@ def pending():
             min_coverage=1.0,
         ),
         reviewers=(),
+        integrations=IntegrationsConfig(),
     )
     violations = enforce_policy(artifacts, policy)
     assert violations == ["Coverage 0/1 (0.00%) below required 100%"], violations
@@ -216,6 +219,7 @@ def test_ignore_unannotated_skips_auto_tagging(tmp_path: Path) -> None:
             ignore_unannotated=True,
         ),
         reviewers=(),
+        integrations=IntegrationsConfig(),
     )
     result = annotate_paths([module], policy=policy, ai_agent="gpt-4")
     assert not result.updated_files
@@ -248,6 +252,7 @@ def test_ignore_unannotated_excludes_from_coverage(tmp_path: Path) -> None:
             ignore_unannotated=True,
         ),
         reviewers=(),
+        integrations=IntegrationsConfig(),
     )
 
     artifacts = parse_file(module)

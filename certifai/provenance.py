@@ -128,12 +128,26 @@ def enforce_policy(artifacts: Sequence[CodeArtifact], policy: PolicyConfig) -> l
         ]
         total = len(function_artifacts)
         if total:
-            certified = sum(
-                1
-                for artifact in function_artifacts
-                if artifact.tags.human_certified
-                and artifact.tags.human_certified.lower() != "pending"
-            )
+            allowed_agents = {perm.id: perm for perm in policy.integrations.agents.reviewers}
+
+            def _is_certified(artifact: CodeArtifact) -> bool:
+                if artifact.tags.human_certified and artifact.tags.human_certified.lower() != "pending":
+                    return True
+                for reviewer in artifact.tags.reviewers:
+                    if reviewer.kind == "human" and reviewer.id and reviewer.id.lower() != "pending":
+                        return True
+                    if reviewer.kind == "agent" and reviewer.id in allowed_agents:
+                        perm = allowed_agents[reviewer.id]
+                        max_level = ScrutinyLevel.from_string(perm.max_scrutiny) if perm.max_scrutiny else None
+                        if max_level is None:
+                            return True
+                        agent_level = reviewer.scrutiny or ScrutinyLevel.AUTO
+                        order = [ScrutinyLevel.AUTO, ScrutinyLevel.LOW, ScrutinyLevel.MEDIUM, ScrutinyLevel.HIGH]
+                        if order.index(agent_level) <= order.index(max_level):
+                            return True
+                return False
+
+            certified = sum(1 for artifact in function_artifacts if _is_certified(artifact))
             coverage = certified / total
             if coverage < policy.enforcement.min_coverage:
                 violations.append(

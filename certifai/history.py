@@ -34,6 +34,7 @@ def compute_digest(metadata: TagMetadata) -> str:
         metadata.date or "",
         metadata.notes or "",
         "\n".join(metadata.extras),
+        "\n".join(metadata.agents),
         "done" if metadata.done else "",
     ]
     joined = "|".join(parts)

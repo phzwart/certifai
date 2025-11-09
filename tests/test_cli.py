@@ -7,6 +7,7 @@ from click.testing import CliRunner
 from certifai.cli import cli
 from certifai.registry import load_registry
 from certifai.decorators import certifai
+from certifai.policy import DEFAULT_POLICY, load_policy
 
 
 @certifai(
@@ -91,3 +92,135 @@ def foo():
     assert "done=True" in content
     registry = load_registry(tmp_path)
     assert (str(module), "foo") in registry
+
+
+def test_certify_agent_respects_policy(tmp_path: Path) -> None:
+    module = tmp_path / "agent.py"
+    module.write_text(
+        """
+from certifai.decorators import certifai
+
+
+@certifai(ai_composed="gpt-5", human_certified="pending")
+def foo():
+    return 1
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    policy_file = tmp_path / "policy.yml"
+    policy_file.write_text(
+        """
+integrations:
+  agents:
+    enabled: true
+    reviewers:
+      - id: github/app-bot
+        max_scrutiny: medium
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "certify-agent",
+            str(module),
+            "--agent",
+            "github/app-bot",
+            "--scrutiny",
+            "high",
+            "--policy",
+            str(policy_file),
+        ],
+    )
+    assert result.exit_code != 0
+    assert "not allowed" in result.output
+
+
+def test_certify_agent_disallowed_without_policy(tmp_path: Path) -> None:
+    module = tmp_path / "agent_fail.py"
+    module.write_text(
+        """
+from certifai.decorators import certifai
+
+
+@certifai(ai_composed="gpt-5", human_certified="pending")
+def foo():
+    return 1
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    policy_file = tmp_path / "policy.yml"
+    policy_file.write_text("integrations: {}\n", encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "certify",
+            str(module),
+            "--reviewer",
+            "github/app-bot",
+            "--scrutiny",
+            "medium",
+            "--agent",
+            "--policy",
+            str(policy_file),
+        ],
+    )
+    assert result.exit_code != 0
+    assert "Agent-based certification" in result.output
+
+
+def test_certify_agent_command_updates_metadata(tmp_path: Path) -> None:
+    module = tmp_path / "agent.py"
+    module.write_text(
+        """
+from certifai.decorators import certifai
+
+
+@certifai(ai_composed="gpt-5", human_certified="pending")
+def foo():
+    return 1
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    policy_file = tmp_path / "policy.yml"
+    policy_file.write_text(
+        """
+integrations:
+  agents:
+    enabled: true
+    reviewers:
+      - id: bot-1
+        max_scrutiny: medium
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "certify-agent",
+            str(module),
+            "--agent",
+            "bot-1",
+            "--scrutiny",
+            "medium",
+            "--policy",
+            str(policy_file),
+        ],
+    )
+    assert result.exit_code == 0
+    content = module.read_text(encoding="utf-8")
+    assert "agent_certified=\"bot-1\"" in content or "agent_certified=\"bot-1\"" in content.replace('"', '\"')

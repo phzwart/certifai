@@ -29,6 +29,7 @@ certifai badge src/
 - Automatic insertion of provenance headers (`@certifai` metadata such as `ai_composed`, `human_certified`, `scrutiny`, `history`).
 - Finalization workflow that collapses inline metadata to `@certifai(done=True, …)` and stores rich provenance + AST digests in `.certifai/registry.yml`.
 - Natural alignment with the C.L.E.A.R. review framework for AI-generated code: provenance delivers context, coverage reports support layered examination, registry digests enforce explicit verification, and notes/history preserve alternatives and refactoring follow-ups.
+- Flexible reviewer support: humans can certify high-risk code, while approved review agents can record automated checks and (optionally) satisfy lower-risk coverage thresholds.
 - Policy enforcement via `.certifai.yml` (e.g., requiring `high` scrutiny for AI-authored code, minimum coverage thresholds).
 - Click-based CLI for annotation, certification, reporting, badge generation, and config inspection.
 - Pre-commit hook (`certifai-pre-commit`) for continuous provenance tagging during development.

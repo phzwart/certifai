@@ -31,6 +31,7 @@ class CoverageSummary:
     ai_composed: int
     human_certified: int
     pending_review: int
+    agent_certified: int
     scrutiny_counts: Mapping[str, int]
 
     @certifai(
@@ -69,6 +70,7 @@ class CoverageSummary:
             "ai_composed": self.ai_composed,
             "human_certified": self.human_certified,
             "pending_review": self.pending_review,
+            "agent_certified": self.agent_certified,
             "scrutiny_counts": dict(self.scrutiny_counts),
             "coverage_ratio": self.coverage_ratio,
         }
@@ -113,6 +115,11 @@ def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
     pending_review = sum(
         1 for artifact in function_artifacts if artifact.tags.is_pending_certification
     )
+    agent_certified = sum(
+        1
+        for artifact in function_artifacts
+        if artifact.tags.agents
+    )
     scrutiny_counter: Counter[str] = Counter()
     for artifact in function_artifacts:
         level = artifact.tags.scrutiny or ScrutinyLevel.AUTO
@@ -125,6 +132,7 @@ def build_summary(paths: Iterable[Path | str]) -> CoverageSummary:
         ai_composed=ai_composed,
         human_certified=human_certified,
         pending_review=pending_review,
+        agent_certified=agent_certified,
         scrutiny_counts=dict(scrutiny_counter),
     )
 
@@ -150,6 +158,7 @@ def emit_text_report(summary: CoverageSummary) -> str:
         f"Total functions: {summary.total_functions}",
         f"AI-composed: {summary.ai_composed}",
         f"Human-certified: {summary.human_certified}",
+        f"Agent-certified: {summary.agent_certified}",
         f"Pending review: {summary.pending_review}",
         f"Scrutiny levels — {scrutiny_parts}",
         f"Certification coverage: {coverage_percent:.1f}%",
@@ -174,6 +183,7 @@ def emit_csv_report(summary: CoverageSummary) -> str:
         "total_functions",
         "ai_composed",
         "human_certified",
+        "agent_certified",
         "pending_review",
         "coverage_ratio",
     ]
@@ -181,6 +191,7 @@ def emit_csv_report(summary: CoverageSummary) -> str:
         str(summary.total_functions),
         str(summary.ai_composed),
         str(summary.human_certified),
+        str(summary.agent_certified),
         str(summary.pending_review),
         f"{summary.coverage_ratio:.4f}",
     ]
@@ -206,6 +217,7 @@ def emit_markdown_table(summary: CoverageSummary) -> str:
         f"| Total functions | {summary.total_functions} |",
         f"| AI-composed | {summary.ai_composed} |",
         f"| Human-certified | {summary.human_certified} |",
+        f"| Agent-certified | {summary.agent_certified} |",
         f"| Pending review | {summary.pending_review} |",
         f"| Coverage | {summary.coverage_ratio * 100:.1f}% |",
     ]

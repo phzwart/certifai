@@ -73,6 +73,7 @@ def metadata_from_decorator(node: ast.AST) -> TagMetadata:
 
     history = _normalize_sequence(kwargs.get("history"))
     extras = _normalize_sequence(kwargs.get("extras"))
+    agents = _normalize_sequence(kwargs.get("agents"))
     scrutiny = kwargs.get("scrutiny")
     if isinstance(scrutiny, ScrutinyLevel):
         scrutiny_value: ScrutinyLevel | str | None = scrutiny
@@ -84,11 +85,15 @@ def metadata_from_decorator(node: ast.AST) -> TagMetadata:
     return TagMetadata.from_decorator_kwargs(
         ai_composed=_as_optional_str(kwargs.get("ai_composed")),
         human_certified=_as_optional_str(kwargs.get("human_certified")),
+        agent_certified=_as_optional_str(kwargs.get("agent_certified")),
         scrutiny=scrutiny_value,
         date=_as_optional_str(kwargs.get("date")),
         notes=_as_optional_str(kwargs.get("notes")),
         history=history,
         extras=extras,
+        done=kwargs.get("done"),
+        reviewers=kwargs.get("reviewers"),
+        agents=agents,
     )
 
 
@@ -145,6 +150,11 @@ def _literal_value(node: ast.AST) -> Any:
         return node.value
     if isinstance(node, (ast.List, ast.Tuple)):
         return [_literal_value(element) for element in node.elts]
+    if isinstance(node, ast.Dict):
+        return {
+            _literal_value(key): _literal_value(value)
+            for key, value in zip(node.keys, node.values)
+        }
     return None
 
 
