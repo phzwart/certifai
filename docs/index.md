@@ -4,33 +4,52 @@
 
 ## Tagging Schema
 
-Each function or class is annotated with the `certifai` decorator to describe its provenance and review state:
+During review (Stages 1 and 2) artifacts carry the `@certifai` decorator to surface provenance directly alongside the code under inspection.
+
+**Stage 1 – Annotated (pending review):**
+
+```
+from certifai.decorators import certifai
+
+
+@certifai(ai_composed="claude-sonnet-4", reviewers=[])
+def normalize(df):
+    ...
+```
+
+The minimal decorator flags AI-authored code that still requires certification. Only the composing agent is recorded; the reviewer list is intentionally empty to highlight that human scrutiny is outstanding.
+
+**Stage 2 – Under review (approvals accumulating):**
 
 ```
 from certifai.decorators import certifai
 
 
 @certifai(
-    ai_composed="gpt-5",
-    human_certified="Reviewer",
-    scrutiny="high",
-    date="2025-11-07",
-    notes="logic verified, unit tested, compliant with policy",
-    history=[
-        "2025-11-07T18:22:06Z digest=abc123... annotated by certifai; last_commit=abc1234 by Reviewer",
+    ai_composed="claude-sonnet-4",
+    reviewers=[
+        {"kind": "agent", "id": "test-suite", "scrutiny": "medium", "timestamp": "2025-11-08T10:00:00Z"},
+        {"kind": "human", "id": "peter", "scrutiny": "high", "timestamp": "2025-11-08T11:30:00Z", "notes": "Validated against phantom data"}
     ],
+    notes="Coverage + integration smoke tests pass"
 )
 def normalize(df):
     ...
 ```
 
-- `ai_composed` records which AI model or agent proposed the change (defaults to `pending`).
-- `human_certified` names the reviewer responsible for human approval (`pending` until certified).
-- `scrutiny` captures review depth (`auto`, `low`, `medium`, `high`). Policies can require `high` for AI-authored code.
-- `date` is ISO 8601 timestamp of the most recent certification event.
-- `notes` stores contextual review comments.
-- `history` tracks chronological provenance events, including automated insertions and the latest Git blame metadata.
-- `done` marks an artifact as finalized. When present, detailed provenance is stored in the central registry and the inline decorator collapses to a minimal form (for example `@certifai(done=True, human_certified="Reviewer")`).
+Common metadata fields include:
+
+- `ai_composed`: which AI model or agent proposed the change (defaults to `pending`).
+- `reviewers`: ordered list of approval records with reviewer kind, identifier, scrutiny level, optional notes, and timestamp.
+- `human_certified`: back-compat field populated when a human reviewer is present.
+- `scrutiny`: qualitative depth indicator (`auto`, `low`, `medium`, `high`). Policies often require `high` for AI-authored code.
+- `date`: ISO 8601 timestamp for the most recent certification event.
+- `notes`: contextual review comments.
+- `history`: chronological provenance events recorded while the decorator is attached (e.g., annotation, certification, verification).
+
+**Stage 3 – Finalized:**
+
+Finalization removes the decorator from source code to return it to a pristine state. The complete metadata—reviewers, notes, history, lifecycle events, and AST digest—is persisted in `.certifai/registry.yml`. Drift detection later compares the live AST digest with the registry entry to decide when to reopen the artifact for review.
 
 ### Insertion Algorithm
 
@@ -75,7 +94,7 @@ Automatically inserts provenance headers for untagged artifacts, respecting `.ce
   certifai finalize src/package --registry-root .
   ```
 
-  Moves richly annotated metadata into `.certifai/registry.yml`, rewrites inline decorators to `@certifai(done=True, …)`, and records an implementation digest for each finalized function.
+  Copies richly annotated metadata into `.certifai/registry.yml`, removes inline decorators entirely, appends a lifecycle event (`finalized`), and records an AST digest for drift detection.
 
 ### Reporting & Badges
 
@@ -104,6 +123,31 @@ certifai audit show --limit 10 --output pretty
 `certifai certify-agent` allows trusted review agents to stamp artifacts with their approval while respecting per-agent scrutiny limits defined in `.certifai.yml`. Agent reviews are recorded alongside human reviewers and can satisfy coverage rules when policy permits it.
 
 `certifai audit show` loads the configured audit log (by default `.certifai/audit.log`) and prints the most recent entries, making it easy for compliance teams to review reviewer activity or hand that data to dashboards.
+
+### Agent Findings & Review Status
+
+Agent reviewers (LLMs, static analyzers, scanners) can write structured findings to the audit log and surface them through dedicated CLI commands:
+
+```bash
+# Summarise recent findings for a file (filter by severity or time window)
+certifai findings src/core/critical.py --severity high --days 14 --policy .certifai.yml
+
+# Inspect the most recent agent review for a specific artifact
+certifai review-status src/core/critical.py::calculate_dose --policy .certifai.yml --min-severity medium
+```
+
+`certifai findings` reports severity, message, line numbers, suggestions, and references for matching entries, making it easy to triage agent output during code reviews. `certifai review-status` fetches the most recent agent review for an artifact, prints the result summary, and highlights whether blocking issues remain based on the selected severity threshold.
+
+## Agent Findings API
+
+The `certifai.audit.Audit` helper provides a typed interface for recording and querying agent activity:
+
+- `Audit.record_review()` logs a structured `agent_review` event with severity-tagged findings, optional summaries, and arbitrary metadata (e.g., model identifiers).
+- `Audit.get_findings()` filters stored findings by artifact, path, severity, and recency—useful for dashboards, PR bots, or automated triage scripts.
+- `Audit.get_latest_review()` returns the most recent review payload for an artifact, enabling tooling to display concise status badges.
+- `Audit.has_blocking_issues()` checks whether the latest review includes findings at or above a specified severity (`medium`, `high`, or `critical`), which can feed CI gates or policy enforcement.
+
+Agent workflows can therefore write once to the audit log and reuse the same data pipeline for CLI inspection, automation, and compliance reporting.
 
 ### Policy Inspection
 
@@ -177,7 +221,7 @@ Prints the effective policy in JSON format, combining defaults and values resolv
           types: [python]
   ```
 
-- After annotation, the hook reconciles the registry: if any `done=True` artifact no longer matches its recorded digest, the entry is removed from `.certifai/registry.yml`, the inline decorator is expanded back to a full `@certifai(...)` block, and the function re-enters the certification queue.
+- After annotation, the hook reconciles the registry: if any finalized artifact no longer matches its recorded digest, the entry is archived in the registry history, a minimal `@certifai(ai_composed="…", reviewers=[])` decorator is re-injected, and the function re-enters the certification queue.
 
 ## CI/CD Integration
 
@@ -208,11 +252,11 @@ Prints the effective policy in JSON format, combining defaults and values resolv
 
 certifai tracks the entire journey from AI draft to human-approved code:
 
-1. **Untracked** – No decorator present. Reporting surfaces these definitions as "unknown" so they can be queued for provenance tagging.
-2. **Pending annotation** – `@certifai(ai_composed=...)` is added automatically by `certifai annotate`. At this stage only the AI agent (and optional notes) are recorded.
-3. **Certified** – `certifai certify` updates the decorator with reviewer, scrutiny, notes, timestamps, and history entries. The artifact now meets policy but may still evolve.
-4. **Finalized** – `certifai finalize` collapses inline metadata to `@certifai(done=True, human_certified=...)`, stores rich history + a normalized AST digest in `.certifai/registry.yml`, and ensures the pre-commit hook tracks drift. Any future code change invalidates the digest, automatically re-expands the decorator, and re-queues the function for review.
-5. **Agent-reviewed (optional)** – `certifai agent certify` allows approved review agents (configured in `.certifai.yml`) to record their verification. Agent reviews keep the artifact pending until a human signs off, but can satisfy lower-risk coverage thresholds when policy allows.
+1. **Stage 0 – Untracked**: No decorator present. Reporting surfaces these definitions as "unknown" so they can be queued for provenance tagging.
+2. **Stage 1 – Annotated**: `certifai annotate` inserts a minimal `@certifai(ai_composed=…, reviewers=[])` decorator to flag AI-authored code awaiting review.
+3. **Stage 2 – Under review**: `certifai certify` and related commands append reviewer entries, scrutiny levels, notes, and timestamps to the decorator as approvals accumulate.
+4. **Stage 3 – Finalized**: `certifai finalize` removes the decorator, persists full provenance (including lifecycle history) to `.certifai/registry.yml`, and records an AST digest for drift detection. Any future code change re-injects the Stage 1 decorator, archives the previous registry entry, and re-queues the artifact for review.
+5. **Agent-reviewed (optional)**: `certifai agent certify` allows approved review agents—configured in `.certifai.yml`—to add their verification alongside human reviewers. Agent approvals can satisfy lower-risk coverage thresholds when policy allows.
 
 Reports treat pending and finalized artifacts differently, letting teams monitor certification coverage, regression reopenings, and overall review throughput.
 

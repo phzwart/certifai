@@ -3,46 +3,51 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, List
 
+from .audit import record_reopening
 from .digest import compute_artifact_digest
-from .metadata import MetadataUpdate, update_metadata_blocks
-from .models import ScrutinyLevel, TagMetadata
+from .metadata import MetadataUpdate, insert_metadata_block, update_metadata_blocks
+from .models import CodeArtifact, TagMetadata
 from .parser import parse_file
-from .registry import RegistryEntry, load_registry, save_registry
+from .policy import load_policy
+from .registry import (
+    RegistryEntry,
+    archive_registry_entry,
+    load_registry,
+    save_registry,
+)
 from .utils.logging import get_logger
 
 LOGGER = get_logger("checks")
 
 
-def _lookup_artifacts(path: Path) -> Dict[str, CodeArtifact]:
-    artifacts = parse_file(path)
-    return {artifact.name: artifact for artifact in artifacts}
-
-
 def _metadata_from_entry(entry: RegistryEntry) -> TagMetadata:
-    metadata = TagMetadata(
+    """Create minimal Stage 1 metadata when reopening an artifact."""
+
+    return TagMetadata(
         ai_composed=entry.ai_composed,
-        human_certified=entry.human_certified or "pending",
-        notes=entry.notes,
-        history=list(entry.history),
-        date=entry.date,
+        reviewers=[],  # Stage 1: pending human review
     )
-    if entry.scrutiny:
-        metadata.scrutiny = ScrutinyLevel.from_string(entry.scrutiny)
-    metadata.done = False
-    return metadata
 
 
 def reconcile_registry(registry_root: Path | None = None) -> List[Path]:
-    """Ensure finalized artifacts still match the registered digests.
+    """Ensure finalized artifacts still match registered digests.
 
-    Returns a list of files that were modified during reconciliation.
+    When drift is detected this function:
+    1. Re-injects a minimal Stage 1 decorator
+    2. Archives the previous registry entry
+    3. Logs the reopening event for audit tracking
+
+    Returns the list of modified files.
     """
 
     registry = load_registry(registry_root)
     if not registry:
         return []
+
+    policy = load_policy()
+    audit_settings = policy.integrations.audit
 
     updated_files: set[Path] = set()
     for key, entry in list(registry.items()):
@@ -53,8 +58,9 @@ def reconcile_registry(registry_root: Path | None = None) -> List[Path]:
             registry.pop(key, None)
             continue
 
-        artifacts = _lookup_artifacts(path)
-        artifact = artifacts.get(qualified_name)
+        artifacts = parse_file(path)
+        artifact_map: Dict[str, CodeArtifact] = {artifact.name: artifact for artifact in artifacts}
+        artifact = artifact_map.get(qualified_name)
         if artifact is None:
             LOGGER.info("Artifact %s removed from %s; clearing registry entry", qualified_name, filepath_str)
             registry.pop(key, None)
@@ -64,12 +70,45 @@ def reconcile_registry(registry_root: Path | None = None) -> List[Path]:
         if digest == entry.digest:
             continue
 
-        LOGGER.info("Artifact %s in %s changed; reverting to certification state", qualified_name, filepath_str)
+        LOGGER.info("Artifact %s in %s changed; reopening for review", qualified_name, filepath_str)
         metadata = _metadata_from_entry(entry)
         updates: list[MetadataUpdate] = [(artifact, metadata)]
         if update_metadata_blocks(path, updates):
+            archive_registry_entry(
+                registry,
+                key,
+                entry,
+                reason="code_changed",
+                old_digest=entry.digest,
+                new_digest=digest,
+            )
             registry.pop(key, None)
             updated_files.add(path)
+            record_reopening(
+                audit_settings,
+                artifact,
+                "digest_mismatch",
+                old_digest=entry.digest,
+                new_digest=digest,
+            )
+        elif insert_metadata_block(path, artifact, metadata):
+            archive_registry_entry(
+                registry,
+                key,
+                entry,
+                reason="code_changed",
+                old_digest=entry.digest,
+                new_digest=digest,
+            )
+            registry.pop(key, None)
+            updated_files.add(path)
+            record_reopening(
+                audit_settings,
+                artifact,
+                "digest_mismatch",
+                old_digest=entry.digest,
+                new_digest=digest,
+            )
         else:
             LOGGER.warning("Failed to update metadata for %s", filepath_str)
 

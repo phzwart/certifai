@@ -7,6 +7,7 @@ import pytest
 
 from click.testing import CliRunner
 
+from certifai.audit import Audit
 from certifai.cli import cli
 from certifai.policy import load_policy
 
@@ -107,3 +108,51 @@ integrations:
     if not any(entry.get("action") == "certify" for entry in payload):
         pytest.fail(str(payload))
     assert any(entry.get("action") == "enforce" for entry in payload)
+
+
+def test_audit_record_review_and_query(tmp_path: Path) -> None:
+    log_path = tmp_path / "audit.log"
+    policy_file = tmp_path / "policy.yml"
+    policy_file.write_text(
+        f"""
+integrations:
+  audit:
+    enabled: true
+    log_path: "{log_path}"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    module_path = tmp_path / "tracked.py"
+    module_path.write_text("def stub():\n    return 0\n", encoding="utf-8")
+    artifact_id = f"{module_path}::stub"
+
+    audit = Audit.load(policy_path=policy_file)
+    audit.record_review(
+        agent_id="llm-tester",
+        artifact=artifact_id,
+        filepath=str(module_path),
+        result="issues_found",
+        findings=[
+            {
+                "severity": "high",
+                "category": "correctness",
+                "message": "edge case fails",
+                "line": 1,
+                "suggestion": "handle negative inputs",
+            }
+        ],
+        model="gpt-5",
+    )
+
+    findings = audit.get_findings(filepath=str(module_path), severity="medium", since_days=7)
+    assert findings, "expected findings to be returned"
+    assert findings[0]["finding"]["severity"] == "high"
+    assert "edge case fails" in findings[0]["finding"]["message"]
+
+    latest = audit.get_latest_review(artifact_id)
+    assert latest is not None
+    assert latest["data"]["result"] == "issues_found"
+
+    assert audit.has_blocking_issues(artifact_id, min_severity="medium")

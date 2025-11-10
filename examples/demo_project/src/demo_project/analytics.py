@@ -7,9 +7,13 @@ from typing import Iterable
 
 from certifai.decorators import certifai
 
-@certifai(done=True, human_certified="Mentor")
+
 def compute_accuracy(predictions: Iterable[int], labels: Iterable[int]) -> float:
-    """Return simple classification accuracy."""
+    """Return simple classification accuracy.
+
+    This function represents Stage 3: provenance has been finalized and lives in
+    `.certifai/registry.yml`, so no `@certifai` decorator remains in source.
+    """
 
     preds = list(predictions)
     actuals = list(labels)
@@ -55,9 +59,8 @@ def compute_macro_f1(scores: Iterable[tuple[float, float]]) -> float:
 def summarize_predictions(predictions: Iterable[float]) -> dict[str, float]:
     """Return simple summary metrics for model predictions.
 
-    This function retains full metadata so that `certifai finalize` can
-    demonstrate how provenance collapses to a minimal decorator once work is
-    complete.
+    This function stays in Stage 2 so `certifai finalize` can demonstrate the
+    transition to Stage 3 (decorator removal + registry entry).
     """
 
     values = list(predictions)

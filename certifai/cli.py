@@ -6,7 +6,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional, cast
 
 import click
 
@@ -15,11 +15,13 @@ from .decorators import certifai
 from .certify import certify as certify_artifacts
 from .certify import certify_agent as certify_artifacts_agent
 from .certify import verify_all as verify_artifacts
+from .checks import reconcile_registry
 from .finalize import finalize as finalize_artifacts
 from .integrations.github import build_pr_status
 from .integrations.security import run_all_scanners
 from .publishing import publish_report
 from .audit import (
+    Audit,
     record_certification,
     record_agent_certification,
     record_finalization,
@@ -222,13 +224,181 @@ def agent_certify(paths: tuple[Path, ...], agent_id: str, scrutiny: str, notes: 
 @click.option("--registry-root", type=click.Path(path_type=Path), help="Optional base path for the registry manifest.")
 @click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
 def finalize(paths: tuple[Path, ...], registry_root: Path | None, policy: Path | None) -> None:
-    """Finalize certified artifacts and move provenance to the registry."""
+    """Finalize reviewed artifacts by moving provenance into the registry.
+
+    Steps performed:
+    1. Validates artifacts have required human certification
+    2. Computes AST digests for change detection
+    3. Stores complete provenance (reviewers, history) in .certifai/registry.yml
+    4. Removes @certifai decorators from source code
+    5. Logs finalization activity to the audit log
+    """
 
     target_paths = paths or (Path.cwd(),)
     policy_config = load_policy(policy)
     finalized = finalize_artifacts(target_paths, registry_root=registry_root)
     click.echo(f"Finalized {len(finalized)} artifact(s).")
     record_finalization(policy_config.integrations.audit, finalized)
+
+
+@cli.command()
+@click.option("--registry-root", type=click.Path(path_type=Path), help="Root directory for registry files.")
+def check(registry_root: Path | None) -> None:
+    """Reconcile finalized artifacts and reopen drifted code for review.
+
+    This command:
+    1. Compares current AST digests with the registry
+    2. Re-injects a minimal Stage 1 decorator when drift is detected
+    3. Archives the previous registry entry to history
+    4. Logs reopening events to the audit log
+    """
+
+    reopened = reconcile_registry(registry_root=registry_root)
+    if reopened:
+        click.echo("Reopened artifacts in:")
+        for path in reopened:
+            click.echo(f"  - {path}")
+    else:
+        click.echo("No drift detected.")
+
+
+@cli.command()
+@click.argument("path", type=click.Path(path_type=Path))
+@click.option(
+    "--severity",
+    type=click.Choice(["critical", "high", "medium", "low", "info"]),
+    help="Minimum severity level to include.",
+)
+@click.option(
+    "--days",
+    type=int,
+    default=30,
+    show_default=True,
+    help="Limit findings to the last N days (-1 for all).",
+)
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
+@click.option(
+    "--registry-root",
+    type=click.Path(path_type=Path),
+    help="Optional base path used to resolve registry and audit files.",
+)
+def findings(
+    path: Path,
+    severity: str | None,
+    days: int,
+    policy: Path | None,
+    registry_root: Path | None,
+) -> None:
+    """Show recent agent findings recorded for a path."""
+
+    policy_config = load_policy(policy)
+    audit = Audit.from_settings(policy_config.integrations.audit, registry_root=registry_root)
+    if not audit.enabled:
+        raise click.ClickException("Audit logging is disabled in the current policy.")
+
+    findings_list = audit.get_findings(filepath=str(path), severity=severity, since_days=days)
+    if not findings_list:
+        click.echo(f"No findings for {path}.")
+        return
+
+    click.echo(f"Findings for {path}:")
+    for entry in findings_list:
+        finding = entry["finding"]
+        severity_label = str(finding.get("severity", "info"))
+        message = finding.get("message", "")
+        line = finding.get("line")
+        timestamp = entry.get("timestamp") or "unknown time"
+        agent = entry.get("agent") or "unknown agent"
+        click.echo(f"  [{severity_label}] {message}")
+        if line is not None:
+            click.echo(f"    {timestamp} by {agent} (line {line})")
+        else:
+            click.echo(f"    {timestamp} by {agent}")
+        suggestion = finding.get("suggestion")
+        if suggestion:
+            click.echo(f"    Suggestion: {suggestion}")
+        reference = finding.get("reference")
+        if reference:
+            click.echo(f"    Reference: {reference}")
+
+
+@cli.command("review-status")
+@click.argument("artifact")
+@click.option("--policy", type=click.Path(path_type=Path), help="Optional path to a policy file.")
+@click.option(
+    "--registry-root",
+    type=click.Path(path_type=Path),
+    help="Optional base path used to resolve registry and audit files.",
+)
+@click.option(
+    "--min-severity",
+    type=click.Choice(["critical", "high", "medium"]),
+    default="high",
+    show_default=True,
+    help="Minimum severity that counts as blocking when evaluating issues.",
+)
+def review_status(
+    artifact: str,
+    policy: Path | None,
+    registry_root: Path | None,
+    min_severity: str,
+) -> None:
+    """Show the latest agent review status for an artifact."""
+
+    policy_config = load_policy(policy)
+    audit = Audit.from_settings(policy_config.integrations.audit, registry_root=registry_root)
+    if not audit.enabled:
+        raise click.ClickException("Audit logging is disabled in the current policy.")
+
+    review = audit.get_latest_review(artifact)
+    if not review:
+        click.echo(f"No reviews found for {artifact}.")
+        return
+
+    timestamp = review.get("timestamp", "unknown time")
+    data = review.get("data") or {}
+    agent = data.get("agent") or "unknown agent"
+    result = data.get("result") or "unknown"
+
+    click.echo(f"Latest review: {timestamp}")
+    click.echo(f"Agent: {agent}")
+    click.echo(f"Result: {result}")
+
+    summary = data.get("summary")
+    findings = data.get("findings") or []
+    if summary:
+        click.echo("\nFindings summary:")
+        total = summary.get("total_issues")
+        if total:
+            click.echo(f"  total: {total}")
+        for severity_label in ("critical", "high", "medium", "low", "info"):
+            count = summary.get(severity_label)
+            if count:
+                click.echo(f"  {severity_label}: {count}")
+    elif findings:
+        click.echo("\nFindings:")
+        for finding in findings:
+            severity_label = finding.get("severity", "info")
+            message = finding.get("message", "")
+            click.echo(f"  [{severity_label}] {message}")
+
+    severity_literal = cast(Literal["critical", "high", "medium"], min_severity)
+    blocking = audit.has_blocking_issues(artifact, min_severity=severity_literal)
+    click.echo(f"\nBlocking issues ({min_severity}+): {'yes' if blocking else 'no'}")
+
+
+@cli.command()
+@click.argument("path", type=click.Path(path_type=Path))
+@click.option("--artifact", help="Specific function/class to track (e.g., 'MyClass.method').")
+@click.option("--ai-composed", help="AI model that composed this code.")
+@click.option("--reason", help="Reason for tracking this artifact.")
+def track(path: Path, artifact: str | None, ai_composed: str | None, reason: str | None) -> None:
+    """Explicitly mark code for certification tracking (Stage 1 decorator).
+
+    Implementation placeholder until tracking workflow is finalized.
+    """
+
+    raise click.ClickException("certifai track is not implemented yet.")
 
 
 @certifai(

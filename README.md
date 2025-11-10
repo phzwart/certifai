@@ -19,17 +19,35 @@ certifai annotate src/ --ai-agent "gpt-4.1" --notes "initial audit"
 # Certify reviewed artifacts
 certifai certify src/ --reviewer "Mentor" --scrutiny high
 
+# Finalize reviewed artifacts (Stage 2 → Stage 3)
+certifai finalize src/
+
+# Detect drift and reopen changed artifacts for review
+certifai check
+
 # Generate reports and badges
 certifai report --format md src/ > certifai_report.md
 certifai badge src/
+
+# Inspect agent-driven findings and review status
+certifai findings src/core/critical.py
+certifai review-status src/core/critical.py::calculate_dose
 ```
+
+## 4-Stage Lifecycle
+
+1. **Stage 0 – Pristine**: No decorator in source, artifact untracked.
+2. **Stage 1 – Annotated**: Minimal `@certifai(ai_composed="…", reviewers=[])` marks code pending review.
+3. **Stage 2 – Under Review**: Decorator accrues reviewer entries (humans and agents) as approvals arrive.
+4. **Stage 3 – Finalized**: Finalization removes decorators from code, persists full provenance to `.certifai/registry.yml`, and starts drift monitoring. Future edits automatically re-open artifacts by restoring the Stage 1 decorator and archiving the previous registry entry.
 
 ## Features
 
 - Automatic insertion of provenance headers (`@certifai` metadata such as `ai_composed`, `human_certified`, `scrutiny`, `history`).
-- Finalization workflow that collapses inline metadata to `@certifai(done=True, …)` and stores rich provenance + AST digests in `.certifai/registry.yml`.
+- Finalization workflow that removes inline decorators, writes complete provenance (including reviewers and lifecycle history) to `.certifai/registry.yml`, and prepares drift detection to automatically reopen changes.
 - Natural alignment with the C.L.E.A.R. review framework for AI-generated code: provenance delivers context, coverage reports support layered examination, registry digests enforce explicit verification, and notes/history preserve alternatives and refactoring follow-ups.
 - Flexible reviewer support: humans can certify high-risk code, while approved review agents can record automated checks and (optionally) satisfy lower-risk coverage thresholds.
+- Structured agent findings API and CLI tooling (`certifai findings`, `certifai review-status`) for auditing LLM or scanner outputs and gating merges on blocking issues.
 - Policy enforcement via `.certifai.yml` (e.g., requiring `high` scrutiny for AI-authored code, minimum coverage thresholds).
 - Click-based CLI for annotation, certification, reporting, badge generation, and config inspection.
 - Pre-commit hook (`certifai-pre-commit`) for continuous provenance tagging during development.

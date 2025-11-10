@@ -100,6 +100,7 @@ class TagMetadata:
     extras: list[str] = field(default_factory=list)
     done: bool = False
     reviewers: list[ReviewerInfo] = field(default_factory=list)
+    reviewers_initialized: bool = False
 
     @certifai(
         ai_composed="gpt-5",
@@ -145,6 +146,8 @@ class TagMetadata:
             metadata.done = done
         elif isinstance(done, str):
             metadata.done = done.strip().lower() in {"true", "1", "yes"}
+        if reviewers is not None:
+            metadata.reviewers_initialized = True
         if reviewers:
             parsed_reviewers: list[ReviewerInfo] = []
             for entry in reviewers:
@@ -167,6 +170,7 @@ class TagMetadata:
                 )
             metadata.reviewers = parsed_reviewers
         if agents:
+            metadata.reviewers_initialized = True
             for agent_id in agents:
                 if not agent_id:
                     continue
@@ -206,6 +210,8 @@ class TagMetadata:
                 }
                 for reviewer in self.reviewers
             ]
+        elif self.reviewers_initialized:
+            payload["reviewers"] = []
         elif self.agent_ids:
             payload["agents"] = list(self.agent_ids)
         return payload
@@ -243,6 +249,7 @@ class TagMetadata:
                 )
                 for reviewer in self.reviewers
             ],
+            reviewers_initialized=self.reviewers_initialized,
         )
 
     @property
@@ -297,6 +304,7 @@ class TagMetadata:
         ]
         existing.append(reviewer)
         self.reviewers = existing
+        self.reviewers_initialized = True
         if reviewer.kind == "human":
             self.human_certified = reviewer.id
         elif reviewer.kind == "agent":

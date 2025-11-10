@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterable, Sequence, Tuple
+from typing import Sequence, Tuple
 
 from .decorators import certifai, format_metadata_decorator
 from .models import CodeArtifact, TagMetadata
 
 
 MetadataUpdate = Tuple[CodeArtifact, TagMetadata]
+
+__all__ = ["MetadataUpdate", "update_metadata_blocks", "remove_metadata_blocks", "insert_metadata_block"]
 
 
 @certifai(
@@ -52,3 +54,64 @@ def update_metadata_blocks(path: Path, updates: Sequence[MetadataUpdate]) -> boo
     if changed:
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return changed
+
+
+def remove_metadata_blocks(path: Path, artifacts: Sequence[CodeArtifact]) -> bool:
+    """Completely remove ``@certifai`` decorators for finalized artifacts.
+
+    This helper is used during Stage 3 (finalization) to clean up source files
+    while retaining provenance data in the registry.
+    """
+
+    if not artifacts:
+        return False
+
+    source = path.read_text(encoding="utf-8")
+    lines = source.splitlines()
+    changed = False
+
+    # Process in reverse order to avoid shifting subsequent offsets
+    for artifact in sorted(artifacts, key=lambda item: item.start_line, reverse=True):
+        decorator = artifact.decorator
+        if decorator is None:
+            continue
+
+        start_idx = decorator.start_line - 1
+        end_idx = decorator.end_line
+        del lines[start_idx:end_idx]
+        changed = True
+
+    if changed:
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    return changed
+
+
+def insert_metadata_block(path: Path, artifact: CodeArtifact, metadata: TagMetadata) -> bool:
+    """Insert an @certifai decorator for the provided artifact.
+
+    Parameters
+    ----------
+    path:
+        Path to the Python source file containing the artifact.
+    artifact:
+        Artifact describing where the decorator should be inserted.
+    metadata:
+        Metadata to serialize into the decorator.
+
+    Returns
+    -------
+    bool
+        ``True`` if the file was modified, ``False`` otherwise.
+    """
+
+    decorator_lines = format_metadata_decorator(metadata, indent=artifact.indent)
+    if not decorator_lines:
+        return False
+
+    source = path.read_text(encoding="utf-8")
+    lines = source.splitlines()
+    insertion_index = artifact.start_line - 1
+    lines[insertion_index:insertion_index] = decorator_lines
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return True

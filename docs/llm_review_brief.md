@@ -1,13 +1,13 @@
 # Certifai Overview and Workflow Brief
 
 ## Core Capabilities (Extended)
-- **Decorator-driven provenance**: Every discovered function/class can be annotated with `@certifai(...)`, embedding structured metadata about AI composition, human and agent reviewers, scrutiny level, notes, history, and completion status (`done=True`). Decorator parsing is resilient to both modern `reviewers=[{...}]` payloads and legacy `agents=["id"]` lists by normalising into `TagMetadata.reviewers` entries.
+- **Decorator-driven provenance**: Every discovered function/class can be annotated with `@certifai(...)`, embedding structured metadata about AI composition, human and agent reviewers, scrutiny level, notes, history, and lifecycle stage (Stage 1 pending review vs Stage 2 under review). Decorator parsing is resilient to both modern `reviewers=[{...}]` payloads and legacy `agents=["id"]` lists by normalising into `TagMetadata.reviewers` entries.
 - **Lifecycle automation**:
   - `certifai annotate` discovers Python artifacts via `ast` parsing, injecting new decorator blocks (with configurable AI agent defaults) when missing.
-  - `certifai certify` performs in-place metadata rewrites, updating `human_certified`, `scrutiny`, `history`, `reviewers`, and clearing `done` (finalized artifacts are skipped unless `--include-existing` is set).
+  - `certifai certify` performs in-place metadata rewrites, updating `human_certified`, `scrutiny`, `history`, and `reviewers` (Stage 2), and skips finalized artifacts unless `--include-existing` is set.
   - `certifai certify-agent` mirrors the human command but enforces policy-configured agent permissions before appending an agent reviewer entry; both commands use the shared `_rewrite_metadata` pipeline.
-  - `certifai finalize` computes AST-stable digests (via `certifai/digest.py`), records registry entries in `.certifai/registry.yml`, prunes inline metadata to minimal `done=True` markers, and preserves detailed history out-of-band.
-  - `certifai check` (a.k.a. `reconcile_registry`) reopens artifacts whose digest no longer matches registry entries, rehydrating decorator metadata from registry records and stripping `done=True`.
+  - `certifai finalize` computes AST-stable digests (via `certifai/digest.py`), records registry entries in `.certifai/registry.yml`, removes inline decorators entirely (Stage 3 code is pristine), and preserves detailed provenance plus lifecycle history out-of-band.
+  - `certifai check` (a.k.a. `reconcile_registry`) reopens artifacts whose digest no longer matches registry entries by restoring the minimal Stage 1 decorator (`@certifai(ai_composed=…, reviewers=[])`), archiving the previous registry entry, and logging a reopening event.
 - **Agent reviewer support**: `TagMetadata` exposes rich reviewer info (`ReviewerInfo`) with `kind` (human/agent), `id`, `scrutiny`, `timestamp`, and optional notes. `agents` properties provide legacy compatibility. Coverage, policy enforcement, PR status, and audit logging natively handle blended human/agent reviewer sets.
 - **Coverage & policy enforcement**: `provenance.enforce_policy` evaluates AI scrutiny rules, handles ignore lists, and (with the new logic) credits allowed agents toward coverage thresholds based on their configured `max_scrutiny`. `enforce.enforce_ci` orchestrates coverage evaluation, security scanner results, and PR status computation to produce machine-readable pass/fail payloads and human-readable messages.
 - **Security scanner integration**: `integrations/security.py` composes shell commands (with optional `{targets}` placeholder), executes them with environment isolation, and attempts JSON decoding to store findings; non-JSON output is preserved raw. Results feed into CI enforcement and audit logs.
@@ -15,7 +15,7 @@
 - **PR/CI integrations**:
   - `certifai pr status` outputs JSON detailing status checks, coverage metrics (with agent-adjusted ratios), pending artifact descriptors, and separate lists for AI-pending vs agent-only approvals.
   - `.github/workflows/certifai.yml` demonstrates a minimal GitHub Action running the `enforce` command; more complex pipelines can chain `certify-agent`, scanners, and publishing steps.
-- **Audit logging**: Implemented in `certifai/audit.py`, logging functions accept optional overrides for log destination, emit JSONL with consistent keys (`timestamp`, `action`, `data`), and are invoked from human certification, agent certification, finalization, and enforcement pathways. `audit show` surfaces logs for analysts/LLMs.
+- **Audit logging & agent findings**: The `certifai.audit.Audit` helper records structured agent findings (severity, category, message, line, suggestion, references) and exposes query methods (`get_findings`, `get_latest_review`, `has_blocking_issues`). CLI commands `certifai findings` and `certifai review-status` surface this data for engineers and CI gates. Traditional logging functions still emit JSONL with consistent keys and can be viewed via `certifai audit show`.
 
 ## Detailed Workflows
 ### 1. Human Review Lifecycle
@@ -27,9 +27,9 @@
 3. **Policy enforcement**
    - `certifai enforce` (in CI) recalculates coverage, ensuring high scrutiny for AI-authored code and evaluating security scanners. Failures surface as GitHub status check errors and CLI non-zero exits.
 4. **Finalization**
-   - After all conditions satisfied, run `certifai finalize module.py --policy .certifai.yml`. The command updates `.certifai/registry.yml`, writes digests, trims inline metadata to `@certifai(done=True, human_certified="Alice")`, and logs `action="finalize"` entries.
+   - After all conditions satisfied, run `certifai finalize module.py --policy .certifai.yml`. The command updates `.certifai/registry.yml`, writes digests, removes inline metadata decorators, and logs `action="finalize"` entries.
 5. **Registry Reconciliation**
-   - Pre-commit or CI hook executes `certifai check --registry-root .` to detect drift; reopened artifacts regain full metadata and are removed from registry.
+   - Pre-commit or CI hook executes `certifai check --registry-root .` to detect drift; reopened artifacts regain the minimal Stage 1 decorator and are removed from the active registry while their prior entry is archived.
 
 ### 2. Agent Review Lifecycle
 1. **Configure Agent in Policy**
@@ -125,7 +125,7 @@
    - Use `certifai audit show` to track agent actions, ensuring change controls capture automated sign-offs.
    - Extend dashboards to differentiate `kind"="agent"` vs `kind"="human"` actions.
 6. **Finalization Strategy**:
-   - If `allow_finalize` is false, automated pipelines should not call `certifai finalize` until a human review occurs. Finalization logic checks for `done` + registry entry so agents cannot finalize restricted artifacts.
+   - If `allow_finalize` is false, automated pipelines should not call `certifai finalize` until a human review occurs. Finalization now requires an eligible human reviewer and results in a registry entry with lifecycle history while the codebase remains free of provenance decorators.
 
 ## Reporting & Dashboards (Deep Dive)
 - **Markdown/CSV/JSON reports** (from `report.py`) include statistics:

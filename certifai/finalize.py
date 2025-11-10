@@ -7,10 +7,10 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 from .digest import compute_artifact_digest
-from .metadata import MetadataUpdate, update_metadata_blocks
-from .models import CodeArtifact, TagMetadata
+from .metadata import remove_metadata_blocks
+from .models import CodeArtifact
 from .parser import iter_python_files, parse_file
-from .registry import RegistryEntry, load_registry, registry_key, save_registry, update_registry
+from .registry import RegistryEntry, load_registry, save_registry, update_registry
 from .utils.logging import get_logger
 
 LOGGER = get_logger("finalize")
@@ -24,16 +24,6 @@ def _finalizable(artifact: CodeArtifact) -> bool:
     return True
 
 
-def _finalized_metadata(original: TagMetadata) -> TagMetadata:
-    metadata = original.clone()
-    metadata.done = True
-    # Trim inline metadata to the essentials; detailed history moves to registry.
-    metadata.notes = None
-    metadata.history = []
-    metadata.date = metadata.date or datetime.now(timezone.utc).isoformat()
-    return metadata
-
-
 def finalize(paths: Iterable[Path | str], *, registry_root: Path | None = None) -> Sequence[CodeArtifact]:
     """Finalize certified artifacts and record them in the registry."""
 
@@ -44,23 +34,28 @@ def finalize(paths: Iterable[Path | str], *, registry_root: Path | None = None) 
 
     for path in resolved_paths:
         artifacts = list(parse_file(path))
-        updates: list[MetadataUpdate] = []
+        removal_updates: list[CodeArtifact] = []
         registry_updates: list[tuple[CodeArtifact, RegistryEntry]] = []
 
         for artifact in artifacts:
             if not _finalizable(artifact):
                 continue
             digest = compute_artifact_digest(artifact)
-            metadata = _finalized_metadata(artifact.tags)
-            entry = RegistryEntry.from_artifact(artifact, artifact.tags, digest, timestamp=now)
+            entry = RegistryEntry.from_artifact_full(
+                artifact,
+                artifact.tags,
+                digest,
+                timestamp=now,
+                include_reviewers=True,
+            )
             registry_updates.append((artifact, entry))
-            updates.append((artifact, metadata))
+            removal_updates.append(artifact)
 
-        if not updates:
+        if not removal_updates:
             continue
 
-        if update_metadata_blocks(path, updates):
-            finalized.extend([item[0] for item in updates])
+        if remove_metadata_blocks(path, removal_updates):
+            finalized.extend(removal_updates)
             update_registry(registry, registry_updates)
         else:
             LOGGER.warning("Failed to update metadata blocks for %s", path)
